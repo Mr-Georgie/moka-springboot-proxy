@@ -39,7 +39,7 @@ public class CardParams {
     private String body;
 
     @Lob
-    @Column(name = "response", nullable = false)
+    @Column(name = "response", nullable = false, columnDefinition = "LONGTEXT")
     private String response;
 
     @Column(name = "time_in", nullable = false)
