@@ -1,0 +1,42 @@
+{"properties": [
+  {
+    "name": "payment.dealer.authentication.dealercode",
+    "type": "java.lang.String",
+    "description": "A description for 'payment.dealer.authentication.dealercode'"
+  },
+  {
+    "name": "payment.dealer.authentication.checkkey",
+    "type": "java.lang.String",
+    "description": "A description for 'payment.dealer.authentication.checkkey'"
+  },
+  {
+    "name": "payment.dealer.authentication.password",
+    "type": "java.lang.String",
+    "description": "A description for 'payment.dealer.authentication.password'"
+  },
+  {
+    "name": "payment.dealer.authentication.username",
+    "type": "java.lang.String",
+    "description": "A description for 'payment.dealer.authentication.username'"
+  },
+  {
+    "name": "provider.endpoints.void",
+    "type": "java.lang.String",
+    "description": "A description for 'provider.endpoints.void'"
+  },
+  {
+    "name": "provider.endpoints.authorize",
+    "type": "java.lang.String",
+    "description": "A description for 'provider.endpoints.authorize'"
+  },
+  {
+    "name": "provider.endpoints.capture",
+    "type": "java.lang.String",
+    "description": "A description for 'provider.endpoints.capture'"
+  },
+  {
+    "name": "provider.endpoints.refund",
+    "type": "java.lang.String",
+    "description": "A description for 'provider.endpoints.refund'"
+  }
+]}
