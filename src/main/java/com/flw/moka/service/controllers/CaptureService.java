@@ -21,7 +21,7 @@ import com.flw.moka.service.entities.ProxyResponseService;
 import com.flw.moka.service.entities.TransactionService;
 import com.flw.moka.utilities.DbUtility;
 import com.flw.moka.utilities.ProviderApiUtility;
-// import com.flw.moka.utilities.TimeUtility;
+import com.flw.moka.utilities.TimeUtility;
 
 import lombok.AllArgsConstructor;
 
@@ -71,16 +71,16 @@ public class CaptureService {
     static Transaction updateTransaction(ProductRequest productRequest, Transaction transaction,
             ProxyResponse proxyResponse) {
 
-        // TimeUtility timeUtility = new TimeUtility();
+        TimeUtility timeUtility = new TimeUtility();
 
         transaction.setAmount(productRequest.getAmount());
         transaction.setExternalRef(proxyResponse.getExRef());
         transaction.setMessage("successful");
         transaction.setTransactionRef(productRequest.getTransactionReference());
         transaction.setTransactionStatus("capture");
-        // transaction.setTimeCaptured(timeUtility.getDateTime());
+        transaction.setTimeCaptured(timeUtility.getDateTime());
 
-        transaction.setTimeCaptured("2023-03-16 12:55:22");
+        // transaction.setTimeCaptured("2023-03-16 12:55:22");
         // test void-refund logic with "2023-03-16 12:55:22"
 
         return transaction;
