@@ -20,14 +20,14 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping("/capture")
+@RequestMapping("/api")
 public class CaptureController {
 
         ProviderPayloadService providerPayloadService;
         PaymentDealerRequestService paymentDealerRequestService;
         CaptureService captureService;
 
-        @PostMapping(path = "", consumes = "application/json", produces = "application/json")
+        @PostMapping(path = "/capture", consumes = "application/json", produces = "application/json")
         public ResponseEntity<ProxyResponse> saveCardParams(@RequestBody ProductRequest productRequest)
                         throws URISyntaxException {
 

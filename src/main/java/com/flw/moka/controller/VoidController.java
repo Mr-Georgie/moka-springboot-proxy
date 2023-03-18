@@ -21,13 +21,13 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping("/void")
+@RequestMapping("/api")
 public class VoidController {
         ProviderPayloadService providerPayloadService;
         PaymentDealerRequestService paymentDealerRequestService;
         VoidService voidService;
 
-        @PostMapping(path = "", consumes = "application/json", produces = "application/json")
+        @PostMapping(path = "/void", consumes = "application/json", produces = "application/json")
         public ResponseEntity<ProxyResponse> saveCardParams(@RequestBody ProductRequest productRequest)
                         throws URISyntaxException, ParseException {
 

@@ -21,26 +21,26 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping("/refund")
+@RequestMapping("/api")
 public class RefundController {
-    ProviderPayloadService providerPayloadService;
-    PaymentDealerRequestService paymentDealerRequestService;
-    RefundService refundService;
+        ProviderPayloadService providerPayloadService;
+        PaymentDealerRequestService paymentDealerRequestService;
+        RefundService refundService;
 
-    @PostMapping(path = "", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<ProxyResponse> saveCardParams(@RequestBody ProductRequest productRequest)
-            throws URISyntaxException, ParseException {
+        @PostMapping(path = "/refund", consumes = "application/json", produces = "application/json")
+        public ResponseEntity<ProxyResponse> saveCardParams(@RequestBody ProductRequest productRequest)
+                        throws URISyntaxException, ParseException {
 
-        PaymentDealerRequest paymentDealerRequest = paymentDealerRequestService.saveRequestPayload(
-                productRequest,
-                "refund");
-        ProviderPayload providerPayload = providerPayloadService
-                .savePaymentDealerAuthAndReq(paymentDealerRequest);
+                PaymentDealerRequest paymentDealerRequest = paymentDealerRequestService.saveRequestPayload(
+                                productRequest,
+                                "refund");
+                ProviderPayload providerPayload = providerPayloadService
+                                .savePaymentDealerAuthAndReq(paymentDealerRequest);
 
-        ResponseEntity<ProxyResponse> responseEntity = refundService.sendProviderPayload(providerPayload,
-                productRequest);
+                ResponseEntity<ProxyResponse> responseEntity = refundService.sendProviderPayload(providerPayload,
+                                productRequest);
 
-        return responseEntity;
+                return responseEntity;
 
-    }
+        }
 }

@@ -21,14 +21,14 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping("/auth")
-public class AuthController {
+@RequestMapping("/api")
+public class AuthorizeController {
 
         ProviderPayloadService providerPayloadService;
         PaymentDealerRequestService paymentDealerRequestService;
         AuthService authService;
 
-        @PostMapping(path = "", consumes = "application/json", produces = "application/json")
+        @PostMapping(path = "/authorize", consumes = "application/json", produces = "application/json")
         public ResponseEntity<ProxyResponse> saveCardParams(@Valid @RequestBody ProductRequest productRequest,
                         BindingResult bindingResult)
                         throws Exception {
