@@ -39,7 +39,7 @@ public class AuthorizeController {
 
                 PaymentDealerRequest paymentDealerRequest = paymentDealerRequestService.saveRequestPayload(
                                 productRequest,
-                                "auth");
+                                "authorize");
                 ProviderPayload providerPayload = providerPayloadService
                                 .savePaymentDealerAuthAndReq(paymentDealerRequest);
 

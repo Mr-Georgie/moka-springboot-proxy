@@ -23,9 +23,9 @@ public class ShouldVoidOrRefundUtility {
         }
 
         TimeUtility timeUtility = new TimeUtility();
+        Boolean isTransactionUpTo24Hours = timeUtility.isTransactionUpTo24Hours(timeCaptured);
 
         if (method.equalsIgnoreCase("void")) {
-            Boolean isTransactionUpTo24Hours = timeUtility.isTransactionUpTo24Hours(timeCaptured);
 
             if (isTransactionUpTo24Hours) {
                 throw new TransactionShouldBeRefundedException("This transaction should be refunded");
@@ -33,7 +33,6 @@ public class ShouldVoidOrRefundUtility {
         }
 
         if (method.equalsIgnoreCase("refund")) {
-            Boolean isTransactionUpTo24Hours = timeUtility.isTransactionUpTo24Hours(timeCaptured);
 
             if (!isTransactionUpTo24Hours) {
                 throw new TransactionShouldBeVoidedException("This transaction should be voided");

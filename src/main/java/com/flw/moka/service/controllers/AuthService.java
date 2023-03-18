@@ -56,7 +56,7 @@ public class AuthService {
         ProxyResponse proxyResponse = proxyResponseService.createProxyResponse(optionalData, optionalBody,
                 productRequestWithMaskedCardNumber);
 
-        DbUtility dbUtility = new DbUtility("auth");
+        DbUtility dbUtility = new DbUtility("authorize");
 
         CardParams cardParams = dbUtility.setCardParams(proxyResponse, productRequestWithMaskedCardNumber);
         cardParamsService.saveCardParams(cardParams);

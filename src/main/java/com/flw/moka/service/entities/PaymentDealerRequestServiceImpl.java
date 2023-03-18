@@ -19,7 +19,7 @@ public class PaymentDealerRequestServiceImpl implements PaymentDealerRequestServ
     @Override
     public PaymentDealerRequest saveRequestPayload(ProductRequest productRequest, String method) {
 
-        if (method == "auth") {
+        if (method == "authorize") {
             requestPayload = saveAuthPayload(productRequest);
         } else if (method == "capture") {
             requestPayload = saveCapturePayload(productRequest);
