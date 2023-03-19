@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import com.flw.moka.entity.ProxyResponse;
+import com.flw.moka.entity.helpers.ProxyResponse;
 import com.flw.moka.exception.InvalidProductRequestException;
 import com.flw.moka.exception.NoMethodNamePassedException;
 import com.flw.moka.exception.TransactionAlreadyCapturedException;

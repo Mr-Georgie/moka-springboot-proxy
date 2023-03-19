@@ -7,10 +7,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.flw.moka.entity.PaymentDealerRequest;
-import com.flw.moka.entity.ProductRequest;
-import com.flw.moka.entity.ProviderPayload;
-import com.flw.moka.entity.ProxyResponse;
+import com.flw.moka.entity.helpers.PaymentDealerRequest;
+import com.flw.moka.entity.helpers.ProductRequest;
+import com.flw.moka.entity.helpers.ProviderPayload;
+import com.flw.moka.entity.helpers.ProxyResponse;
 import com.flw.moka.exception.InvalidProductRequestException;
 import com.flw.moka.service.controllers.AuthService;
 import com.flw.moka.service.entities.PaymentDealerRequestService;

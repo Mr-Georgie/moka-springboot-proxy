@@ -5,10 +5,10 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import com.flw.moka.entity.CardParams;
-import com.flw.moka.entity.ProductRequest;
-import com.flw.moka.entity.ProviderResponse;
-import com.flw.moka.entity.ProviderResponseData;
-import com.flw.moka.entity.ProxyResponse;
+import com.flw.moka.entity.helpers.ProductRequest;
+import com.flw.moka.entity.helpers.ProviderResponse;
+import com.flw.moka.entity.helpers.ProviderResponseData;
+import com.flw.moka.entity.helpers.ProxyResponse;
 import com.flw.moka.repository.CardParamsRepository;
 import com.flw.moka.repository.ProxyResponseRepository;
 import com.flw.moka.utilities.TimeUtility;

@@ -4,8 +4,8 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import com.flw.moka.entity.ProxyResponse;
 import com.flw.moka.entity.Transaction;
+import com.flw.moka.entity.helpers.ProxyResponse;
 import com.flw.moka.exception.TransactionAlreadyCapturedException;
 import com.flw.moka.exception.TransactionAlreadyRefundedException;
 import com.flw.moka.exception.TransactionAlreadyVoidedException;

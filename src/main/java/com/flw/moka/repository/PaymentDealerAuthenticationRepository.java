@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Repository;
 
-import com.flw.moka.entity.PaymentDealerAuthentication;
+import com.flw.moka.entity.helpers.PaymentDealerAuthentication;
 
 @Repository
 public class PaymentDealerAuthenticationRepository {

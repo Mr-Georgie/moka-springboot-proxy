@@ -1,4 +1,4 @@
-package com.flw.moka.entity;
+package com.flw.moka.entity.helpers;
 
 import org.springframework.stereotype.Component;
 

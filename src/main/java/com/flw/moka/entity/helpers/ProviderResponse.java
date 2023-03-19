@@ -1,4 +1,4 @@
-package com.flw.moka.entity;
+package com.flw.moka.entity.helpers;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -11,13 +11,14 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProviderResponseData {
-    @JsonProperty("IsSuccessful")
-    private String IsSuccessful;
+public class ProviderResponse {
+
+    @JsonProperty("Data")
+    private ProviderResponseData Data;
     @JsonProperty("ResultCode")
     private String ResultCode;
     @JsonProperty("ResultMessage")
     private String ResultMessage;
-    @JsonProperty("VirtualPosOrderId")
-    private String VirtualPosOrderId;
+    @JsonProperty("Exception")
+    private String Exception;
 }

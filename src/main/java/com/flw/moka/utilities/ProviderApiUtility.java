@@ -10,9 +10,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import com.flw.moka.entity.ProviderPayload;
-import com.flw.moka.entity.ProviderResponse;
-import com.flw.moka.entity.ProviderResponseData;
+import com.flw.moka.entity.helpers.ProviderPayload;
+import com.flw.moka.entity.helpers.ProviderResponse;
+import com.flw.moka.entity.helpers.ProviderResponseData;
 import com.flw.moka.exception.NoProviderResponseDataException;
 import com.flw.moka.exception.NoProviderResponseException;
 

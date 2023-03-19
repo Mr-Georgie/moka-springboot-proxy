@@ -2,8 +2,8 @@ package com.flw.moka.service.entities;
 
 import org.springframework.stereotype.Service;
 
-import com.flw.moka.entity.PaymentDealerRequest;
-import com.flw.moka.entity.ProductRequest;
+import com.flw.moka.entity.helpers.PaymentDealerRequest;
+import com.flw.moka.entity.helpers.ProductRequest;
 import com.flw.moka.exception.NoMethodNamePassedException;
 import com.flw.moka.repository.PaymentDealerRequestRepository;
 

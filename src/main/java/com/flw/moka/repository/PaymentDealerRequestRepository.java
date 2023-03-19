@@ -2,7 +2,7 @@ package com.flw.moka.repository;
 
 import org.springframework.stereotype.Repository;
 
-import com.flw.moka.entity.PaymentDealerRequest;
+import com.flw.moka.entity.helpers.PaymentDealerRequest;
 
 @Repository
 public class PaymentDealerRequestRepository {
