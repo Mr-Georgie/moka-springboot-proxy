@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.flw.moka.entity.CardParams;
 import com.flw.moka.entity.Transaction;
+import com.flw.moka.entity.helpers.Methods;
 import com.flw.moka.entity.helpers.ProductRequest;
 import com.flw.moka.entity.helpers.ProviderPayload;
 import com.flw.moka.entity.helpers.ProviderResponse;
@@ -56,7 +57,7 @@ public class CaptureService {
         ProxyResponse proxyResponse = proxyResponseService.createProxyResponse(optionalData, optionalBody,
                 productRequest);
 
-        DbUtility dbUtility = new DbUtility("capture");
+        DbUtility dbUtility = new DbUtility(Methods.CAPTURE);
 
         CardParams cardParams = dbUtility.setCardParams(proxyResponse, productRequest);
         cardParamsService.saveCardParams(cardParams);
@@ -77,7 +78,7 @@ public class CaptureService {
         transaction.setExternalRef(proxyResponse.getExRef());
         transaction.setMessage("successful");
         transaction.setTransactionRef(productRequest.getTransactionReference());
-        transaction.setTransactionStatus("capture");
+        transaction.setTransactionStatus(Methods.CAPTURE.toUpperCase());
         transaction.setTimeCaptured(timeUtility.getDateTime());
 
         return transaction;

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.flw.moka.entity.helpers.Methods;
 import com.flw.moka.entity.helpers.PaymentDealerRequest;
 import com.flw.moka.entity.helpers.ProductRequest;
 import com.flw.moka.entity.helpers.ProviderPayload;
@@ -33,7 +34,7 @@ public class CaptureController {
 
                 PaymentDealerRequest paymentDealerRequest = paymentDealerRequestService.saveRequestPayload(
                                 productRequest,
-                                "capture");
+                                Methods.CAPTURE);
                 ProviderPayload providerPayload = providerPayloadService
                                 .savePaymentDealerAuthAndReq(paymentDealerRequest);
 

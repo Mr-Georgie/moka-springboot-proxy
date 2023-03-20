@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.flw.moka.entity.CardParams;
 import com.flw.moka.entity.Transaction;
+import com.flw.moka.entity.helpers.Methods;
 import com.flw.moka.entity.helpers.ProductRequest;
 import com.flw.moka.entity.helpers.ProviderPayload;
 import com.flw.moka.entity.helpers.ProviderResponse;
@@ -56,7 +57,7 @@ public class AuthService {
         ProxyResponse proxyResponse = proxyResponseService.createProxyResponse(optionalData, optionalBody,
                 productRequestWithMaskedCardNumber);
 
-        DbUtility dbUtility = new DbUtility("authorize");
+        DbUtility dbUtility = new DbUtility(Methods.AUTHORIZE);
 
         CardParams cardParams = dbUtility.setCardParams(proxyResponse, productRequestWithMaskedCardNumber);
         cardParamsService.saveCardParams(cardParams);
@@ -83,7 +84,7 @@ public class AuthService {
         transaction.setProvider("MOKA");
         transaction.setTimeAuthorized(timeUtility.getDateTime());
         transaction.setTransactionRef(productRequest.getTransactionReference());
-        transaction.setTransactionStatus("Authorized");
+        transaction.setTransactionStatus(Methods.AUTHORIZE.toUpperCase());
 
         return transaction;
     }

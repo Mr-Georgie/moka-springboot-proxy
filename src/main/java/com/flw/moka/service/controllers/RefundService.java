@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.flw.moka.entity.CardParams;
 import com.flw.moka.entity.Transaction;
+import com.flw.moka.entity.helpers.Methods;
 import com.flw.moka.entity.helpers.ProductRequest;
 import com.flw.moka.entity.helpers.ProviderPayload;
 import com.flw.moka.entity.helpers.ProviderResponse;
@@ -60,7 +61,7 @@ public class RefundService {
         ProxyResponse proxyResponse = proxyResponseService.createProxyResponse(optionalData, optionalBody,
                 productRequest);
 
-        DbUtility dbUtility = new DbUtility("refund");
+        DbUtility dbUtility = new DbUtility(Methods.REFUND);
 
         CardParams cardParams = dbUtility.setCardParams(proxyResponse, productRequest);
         cardParamsService.saveCardParams(cardParams);
@@ -81,7 +82,7 @@ public class RefundService {
         transaction.setMessage("successful");
         transaction.setTimeRefunded(timeUtility.getDateTime());
         transaction.setTransactionRef(productRequest.getTransactionReference());
-        transaction.setTransactionStatus("refund");
+        transaction.setTransactionStatus(Methods.REFUND.toUpperCase());
 
         return transaction;
     }
