@@ -10,18 +10,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.flw.moka.entity.CardParams;
-import com.flw.moka.entity.ProductRequest;
-import com.flw.moka.entity.ProviderPayload;
-import com.flw.moka.entity.ProviderResponse;
-import com.flw.moka.entity.ProviderResponseData;
-import com.flw.moka.entity.ProxyResponse;
 import com.flw.moka.entity.Transaction;
+import com.flw.moka.entity.helpers.Methods;
+import com.flw.moka.entity.helpers.ProductRequest;
+import com.flw.moka.entity.helpers.ProviderPayload;
+import com.flw.moka.entity.helpers.ProviderResponse;
+import com.flw.moka.entity.helpers.ProviderResponseData;
+import com.flw.moka.entity.helpers.ProxyResponse;
 import com.flw.moka.service.entities.CardParamsService;
 import com.flw.moka.service.entities.ProxyResponseService;
 import com.flw.moka.service.entities.TransactionService;
 import com.flw.moka.utilities.DbUtility;
 import com.flw.moka.utilities.ProviderApiUtility;
-import com.flw.moka.utilities.TimeUtility;
 
 import lombok.AllArgsConstructor;
 
@@ -56,7 +56,7 @@ public class CaptureService {
         ProxyResponse proxyResponse = proxyResponseService.createProxyResponse(optionalData, optionalBody,
                 productRequest);
 
-        DbUtility dbUtility = new DbUtility("capture");
+        DbUtility dbUtility = new DbUtility(Methods.CAPTURE);
 
         CardParams cardParams = dbUtility.setCardParams(proxyResponse, productRequest);
         cardParamsService.saveCardParams(cardParams);
@@ -71,17 +71,15 @@ public class CaptureService {
     static Transaction updateTransaction(ProductRequest productRequest, Transaction transaction,
             ProxyResponse proxyResponse) {
 
-        TimeUtility timeUtility = new TimeUtility();
+        // TimeUtility timeUtility = new TimeUtility();
 
         transaction.setAmount(productRequest.getAmount());
         transaction.setExternalRef(proxyResponse.getExRef());
         transaction.setMessage("successful");
         transaction.setTransactionRef(productRequest.getTransactionReference());
-        transaction.setTransactionStatus("capture");
-        transaction.setTimeCaptured(timeUtility.getDateTime());
-
-        // transaction.setTimeCaptured("2023-03-16 12:55:22");
-        // test void-refund logic with "2023-03-16 12:55:22"
+        transaction.setTransactionStatus(Methods.CAPTURE.toUpperCase());
+        transaction.setTimeCaptured("2023-03-20 22:00:00");
+        // transaction.setTimeCaptured(timeUtility.getDateTime());
 
         return transaction;
     }

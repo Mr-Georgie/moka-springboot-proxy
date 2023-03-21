@@ -11,12 +11,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.flw.moka.entity.CardParams;
-import com.flw.moka.entity.ProductRequest;
-import com.flw.moka.entity.ProviderPayload;
-import com.flw.moka.entity.ProviderResponse;
-import com.flw.moka.entity.ProviderResponseData;
-import com.flw.moka.entity.ProxyResponse;
 import com.flw.moka.entity.Transaction;
+import com.flw.moka.entity.helpers.Methods;
+import com.flw.moka.entity.helpers.ProductRequest;
+import com.flw.moka.entity.helpers.ProviderPayload;
+import com.flw.moka.entity.helpers.ProviderResponse;
+import com.flw.moka.entity.helpers.ProviderResponseData;
+import com.flw.moka.entity.helpers.ProxyResponse;
 import com.flw.moka.service.entities.CardParamsService;
 import com.flw.moka.service.entities.ProxyResponseService;
 import com.flw.moka.service.entities.TransactionService;
@@ -60,7 +61,7 @@ public class VoidService {
         ProxyResponse proxyResponse = proxyResponseService.createProxyResponse(optionalData, optionalBody,
                 productRequest);
 
-        DbUtility dbUtility = new DbUtility("void");
+        DbUtility dbUtility = new DbUtility(Methods.VOID);
 
         CardParams cardParams = dbUtility.setCardParams(proxyResponse, productRequest);
         cardParamsService.saveCardParams(cardParams);
@@ -81,7 +82,7 @@ public class VoidService {
         transaction.setMessage("successful");
         transaction.setTimeVoided(timeUtility.getDateTime());
         transaction.setTransactionRef(productRequest.getTransactionReference());
-        transaction.setTransactionStatus("void");
+        transaction.setTransactionStatus(Methods.VOID.toUpperCase());
 
         return transaction;
     }

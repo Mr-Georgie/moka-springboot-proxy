@@ -2,7 +2,7 @@ package com.flw.moka.utilities;
 
 import org.springframework.stereotype.Component;
 
-import com.flw.moka.entity.ProductRequest;
+import com.flw.moka.entity.helpers.ProductRequest;
 
 @Component
 public class MaskCardNumberInProductRequestUtility {

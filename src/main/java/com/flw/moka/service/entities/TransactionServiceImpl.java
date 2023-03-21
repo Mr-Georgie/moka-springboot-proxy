@@ -4,8 +4,9 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import com.flw.moka.entity.ProxyResponse;
 import com.flw.moka.entity.Transaction;
+import com.flw.moka.entity.helpers.Methods;
+import com.flw.moka.entity.helpers.ProxyResponse;
 import com.flw.moka.exception.TransactionAlreadyCapturedException;
 import com.flw.moka.exception.TransactionAlreadyRefundedException;
 import com.flw.moka.exception.TransactionAlreadyVoidedException;
@@ -56,31 +57,35 @@ public class TransactionServiceImpl implements TransactionService {
 
         ProxyResponse proxyResponse = new ProxyResponse();
 
-        if (entity.getTransactionStatus().equalsIgnoreCase(method)) {
-            proxyResponse
-                    .setMessage("This transaction status is: " + method.toUpperCase());
+        // the first condition before the || operator is to catch already 
+        // captured transaction that their status is now void
+        
+        if (Methods.CAPTURE.equalsIgnoreCase(method) && entity.getTimeCaptured() != null
+                || entity.getTransactionStatus().equalsIgnoreCase(method)) {
+            proxyResponse.setMessage("This transaction status is: " + method.toUpperCase());
             proxyResponse.setCode("RR-400");
             proxyResponse.setProvider("MOKA");
 
             proxyResponseService.saveFailedResponseToDB(proxyResponse, transactionRef, method);
 
             return sendCorrectErrorResponse(method, transactionRef);
-        } else {
-            return entity;
         }
+
+        return entity;
+
     }
 
     private Transaction sendCorrectErrorResponse(String method, String transactionRef) {
 
-        if ("capture".equals(method)) {
+        if (method.equalsIgnoreCase(Methods.CAPTURE)) {
             throw new TransactionAlreadyCapturedException(transactionRef);
         }
 
-        if ("void".equals(method)) {
+        if (method.equalsIgnoreCase(Methods.VOID)) {
             throw new TransactionAlreadyVoidedException(transactionRef);
         }
 
-        if ("refund".equals(method)) {
+        if (method.equalsIgnoreCase(Methods.REFUND)) {
             throw new TransactionAlreadyRefundedException(transactionRef);
         }
 

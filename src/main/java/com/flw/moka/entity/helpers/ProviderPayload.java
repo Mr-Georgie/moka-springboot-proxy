@@ -1,4 +1,4 @@
-package com.flw.moka.entity;
+package com.flw.moka.entity.helpers;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

@@ -1,8 +1,8 @@
 package com.flw.moka.utilities;
 
 import com.flw.moka.entity.CardParams;
-import com.flw.moka.entity.ProductRequest;
-import com.flw.moka.entity.ProxyResponse;
+import com.flw.moka.entity.helpers.ProductRequest;
+import com.flw.moka.entity.helpers.ProxyResponse;
 import com.google.gson.Gson;
 
 public class DbUtility {

@@ -4,10 +4,10 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Repository;
 
-import com.flw.moka.entity.ProductRequest;
-import com.flw.moka.entity.ProviderResponse;
-import com.flw.moka.entity.ProviderResponseData;
-import com.flw.moka.entity.ProxyResponse;
+import com.flw.moka.entity.helpers.ProductRequest;
+import com.flw.moka.entity.helpers.ProviderResponse;
+import com.flw.moka.entity.helpers.ProviderResponseData;
+import com.flw.moka.entity.helpers.ProxyResponse;
 
 @Repository
 public class ProxyResponseRepository {

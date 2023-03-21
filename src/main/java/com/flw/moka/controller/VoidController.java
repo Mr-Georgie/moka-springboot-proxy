@@ -9,10 +9,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.flw.moka.entity.PaymentDealerRequest;
-import com.flw.moka.entity.ProductRequest;
-import com.flw.moka.entity.ProviderPayload;
-import com.flw.moka.entity.ProxyResponse;
+import com.flw.moka.entity.helpers.Methods;
+import com.flw.moka.entity.helpers.PaymentDealerRequest;
+import com.flw.moka.entity.helpers.ProductRequest;
+import com.flw.moka.entity.helpers.ProviderPayload;
+import com.flw.moka.entity.helpers.ProxyResponse;
 import com.flw.moka.service.controllers.VoidService;
 import com.flw.moka.service.entities.PaymentDealerRequestService;
 import com.flw.moka.service.entities.ProviderPayloadService;
@@ -21,19 +22,19 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping("/void")
+@RequestMapping("/api")
 public class VoidController {
         ProviderPayloadService providerPayloadService;
         PaymentDealerRequestService paymentDealerRequestService;
         VoidService voidService;
 
-        @PostMapping(path = "", consumes = "application/json", produces = "application/json")
+        @PostMapping(path = "/void", consumes = "application/json", produces = "application/json")
         public ResponseEntity<ProxyResponse> saveCardParams(@RequestBody ProductRequest productRequest)
                         throws URISyntaxException, ParseException {
 
                 PaymentDealerRequest paymentDealerRequest = paymentDealerRequestService.saveRequestPayload(
                                 productRequest,
-                                "void");
+                                Methods.VOID);
                 ProviderPayload providerPayload = providerPayloadService
                                 .savePaymentDealerAuthAndReq(paymentDealerRequest);
 
