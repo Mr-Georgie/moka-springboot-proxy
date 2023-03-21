@@ -78,7 +78,7 @@ public class CaptureService {
         transaction.setMessage("successful");
         transaction.setTransactionRef(productRequest.getTransactionReference());
         transaction.setTransactionStatus(Methods.CAPTURE.toUpperCase());
-        transaction.setTimeCaptured("2023-03-19 22:00:00");
+        transaction.setTimeCaptured("2023-03-20 22:00:00");
         // transaction.setTimeCaptured(timeUtility.getDateTime());
 
         return transaction;
