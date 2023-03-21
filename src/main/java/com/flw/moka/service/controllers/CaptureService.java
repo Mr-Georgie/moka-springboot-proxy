@@ -49,9 +49,7 @@ public class CaptureService {
         Transaction getTransactionIfNotCaptured = transactionService.getTransaction(productRef, "capture");
 
         ResponseEntity<ProviderResponse> responseEntity = providerApiUtility.makeApiCall(url, providerPayload);
-
         Optional<ProviderResponse> optionalBody = providerApiUtility.handleNoResponse(responseEntity);
-
         Optional<ProviderResponseData> optionalData = providerApiUtility.unwrapResponse(optionalBody);
 
         ProxyResponse proxyResponse = proxyResponseService.createProxyResponse(optionalData, optionalBody,
@@ -63,7 +61,6 @@ public class CaptureService {
         cardParamsService.saveCardParams(cardParams);
 
         Transaction updatedTransaction = updateTransaction(productRequest, getTransactionIfNotCaptured, proxyResponse);
-
         transactionService.saveTransaction(updatedTransaction);
 
         return new ResponseEntity<>(proxyResponse, HttpStatus.CREATED);
