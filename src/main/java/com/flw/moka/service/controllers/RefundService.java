@@ -1,12 +1,10 @@
 package com.flw.moka.service.controllers;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.util.Optional;
 
 import org.springframework.core.env.Environment;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -21,69 +19,63 @@ import com.flw.moka.entity.helpers.ProxyResponse;
 import com.flw.moka.service.entities.CardParamsService;
 import com.flw.moka.service.entities.ProxyResponseService;
 import com.flw.moka.service.entities.TransactionService;
-import com.flw.moka.utilities.DbUtility;
-import com.flw.moka.utilities.ProviderApiUtility;
-import com.flw.moka.utilities.ShouldVoidOrRefundUtility;
-import com.flw.moka.utilities.TimeUtility;
+import com.flw.moka.utilities.EntityPreparationUtil;
+import com.flw.moka.utilities.ProviderApiUtil;
+import com.flw.moka.utilities.ShouldVoidOrRefundUtil;
 
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 @Service
 public class RefundService {
-    private Environment environment;
-    CardParamsService cardParamsService;
-    TransactionService transactionService;
-    ProxyResponseService proxyResponseService;
-    ProviderApiUtility providerApiUtility;
-    ShouldVoidOrRefundUtility shouldVoidOrRefundUtility;
+	private Environment environment;
+	CardParamsService cardParamsService;
+	TransactionService transactionService;
+	ProxyResponseService proxyResponseService;
+	ProviderApiUtil providerApiUtil;
+	ShouldVoidOrRefundUtil shouldVoidOrRefundUtility;
 
-    public ResponseEntity<ProxyResponse> sendProviderPayload(ProviderPayload providerPayload,
-            ProductRequest productRequest)
-            throws URISyntaxException, ParseException {
+	public ResponseEntity<ProxyResponse> sendProviderPayload(ProviderPayload providerPayload,
+			ProductRequest productRequest)
+			throws ParseException {
 
-        String authURI = environment.getProperty("provider.endpoints.refund");
+		String refundEndpoint = environment.getProperty("provider.endpoints.refund");
+		URI endpointURI = URI.create(refundEndpoint);
 
-        URI url = new URI(authURI);
+		String productRef = productRequest.getTransactionReference();
 
-        String productRef = productRequest.getTransactionReference();
+		Transaction transactionNotRefunded = transactionService.getTransaction(productRef, Methods.REFUND);
+		shouldVoidOrRefundUtility.routeTransaction(transactionNotRefunded.getTimeCaptured(), Methods.REFUND);
 
-        Transaction transactionNotRefunded = transactionService.getTransaction(productRef, "refund");
+		ResponseEntity<ProviderResponse> responseEntity = providerApiUtil.makeProviderApiCall(
+				endpointURI,
+				providerPayload);
 
-        shouldVoidOrRefundUtility.routeTransaction(transactionNotRefunded.getTimeCaptured(), "refund");
+		Optional<ProviderResponse> providerResponseBody = providerApiUtil.handleNoProviderResponse(responseEntity);
+		Optional<ProviderResponseData> providerResponseData = providerApiUtil
+				.unwrapProviderResponse(providerResponseBody);
 
-        ResponseEntity<ProviderResponse> responseEntity = providerApiUtility.makeApiCall(url, providerPayload);
+		ProxyResponse proxyResponse = proxyResponseService.createProxyResponse(providerResponseData,
+				providerResponseBody,
+				productRequest);
 
-        Optional<ProviderResponse> optionalBody = providerApiUtility.handleNoResponse(responseEntity);
+		CardParams cardParams = prepareCardParams(proxyResponse, productRequest);
+		cardParamsService.saveCardParams(cardParams);
 
-        Optional<ProviderResponseData> optionalData = providerApiUtility.unwrapResponse(optionalBody);
+		Transaction updatedTransaction = updateTransactionStatus(productRequest, transactionNotRefunded, proxyResponse);
+		transactionService.saveTransaction(updatedTransaction);
 
-        ProxyResponse proxyResponse = proxyResponseService.createProxyResponse(optionalData, optionalBody,
-                productRequest);
+		return ResponseEntity.ok(proxyResponse);
+	}
 
-        DbUtility dbUtility = new DbUtility(Methods.REFUND);
+	private CardParams prepareCardParams(ProxyResponse proxyResponse, ProductRequest productRequest) {
+		EntityPreparationUtil entityPreparationUtil = new EntityPreparationUtil(Methods.REFUND);
+		return entityPreparationUtil.setCardParams(proxyResponse, productRequest);
+	}
 
-        CardParams cardParams = dbUtility.setCardParams(proxyResponse, productRequest);
-        cardParamsService.saveCardParams(cardParams);
-
-        Transaction updatedTransaction = updateTransaction(productRequest, transactionNotRefunded, proxyResponse);
-
-        transactionService.saveTransaction(updatedTransaction);
-
-        return new ResponseEntity<>(proxyResponse, HttpStatus.CREATED);
-    }
-
-    static Transaction updateTransaction(ProductRequest productRequest, Transaction transaction,
-            ProxyResponse proxyResponse) {
-
-        TimeUtility timeUtility = new TimeUtility();
-
-        transaction.setExternalRef(proxyResponse.getExRef());
-        transaction.setMessage("successful");
-        transaction.setTimeRefunded(timeUtility.getDateTime());
-        transaction.setTransactionRef(productRequest.getTransactionReference());
-        transaction.setTransactionStatus(Methods.REFUND.toUpperCase());
-
-        return transaction;
-    }
+	private Transaction updateTransactionStatus(ProductRequest productRequest, Transaction transaction,
+			ProxyResponse proxyResponse) {
+		EntityPreparationUtil entityPreparationUtil = new EntityPreparationUtil(Methods.REFUND);
+		return entityPreparationUtil.updateTransactionStatus(productRequest, transaction, proxyResponse);
+	}
 }

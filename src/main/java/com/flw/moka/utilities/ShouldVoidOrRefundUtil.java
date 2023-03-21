@@ -10,7 +10,7 @@ import com.flw.moka.exception.TransactionShouldBeRefundedException;
 import com.flw.moka.exception.TransactionShouldBeVoidedException;
 
 @Component
-public class ShouldVoidOrRefundUtility {
+public class ShouldVoidOrRefundUtil {
     public void routeTransaction(String timeCaptured, String method)
             throws TransactionShouldBeRefundedException, TransactionShouldBeVoidedException, ParseException {
         if (timeCaptured == null || timeCaptured.isEmpty()) {
@@ -22,7 +22,7 @@ public class ShouldVoidOrRefundUtility {
                     "Please provide a method in your void/refund service to use this utility");
         }
 
-        TimeUtility timeUtility = new TimeUtility();
+        TimeUtil timeUtility = new TimeUtil();
         Boolean isTransactionUpTo24Hours = timeUtility.isTransactionUpTo24Hours(timeCaptured);
 
         if (method.equalsIgnoreCase("void")) {

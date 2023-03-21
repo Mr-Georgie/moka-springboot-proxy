@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
-public class TimeUtility {
+public class TimeUtil {
 
     public String getDateTime() {
         return getCurrentTimeUsingDate();
