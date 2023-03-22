@@ -17,9 +17,9 @@ import com.flw.moka.exception.NoProviderResponseDataException;
 import com.flw.moka.exception.NoProviderResponseException;
 
 @Component
-public class ProviderApiUtility {
+public class ProviderApiUtil {
 
-    public ResponseEntity<ProviderResponse> makeApiCall(URI url, ProviderPayload providerPayload) {
+    public ResponseEntity<ProviderResponse> makeProviderApiCall(URI url, ProviderPayload providerPayload) {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -34,7 +34,7 @@ public class ProviderApiUtility {
         return response;
     }
 
-    public Optional<ProviderResponse> handleNoResponse(ResponseEntity<ProviderResponse> responseEntity) {
+    public Optional<ProviderResponse> handleNoProviderResponse(ResponseEntity<ProviderResponse> responseEntity) {
         Optional<ProviderResponse> optionalBody = Optional.ofNullable(responseEntity.getBody());
 
         if (optionalBody.isPresent()) {
@@ -44,7 +44,7 @@ public class ProviderApiUtility {
         }
     }
 
-    public Optional<ProviderResponseData> unwrapResponse(Optional<ProviderResponse> optionalEntity) {
+    public Optional<ProviderResponseData> unwrapProviderResponse(Optional<ProviderResponse> optionalEntity) {
         if (optionalEntity.isPresent()) {
             Optional<ProviderResponseData> optionalData = Optional.ofNullable(optionalEntity.get().getData());
             return optionalData;

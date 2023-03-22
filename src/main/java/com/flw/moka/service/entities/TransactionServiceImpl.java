@@ -7,9 +7,7 @@ import org.springframework.stereotype.Service;
 import com.flw.moka.entity.Transaction;
 import com.flw.moka.entity.helpers.Methods;
 import com.flw.moka.entity.helpers.ProxyResponse;
-import com.flw.moka.exception.TransactionAlreadyCapturedException;
-import com.flw.moka.exception.TransactionAlreadyRefundedException;
-import com.flw.moka.exception.TransactionAlreadyVoidedException;
+import com.flw.moka.exception.TransactionMethodAlreadyDoneException;
 import com.flw.moka.exception.TransactionNotFoundException;
 import com.flw.moka.repository.TransactionRepository;
 
@@ -52,44 +50,45 @@ public class TransactionServiceImpl implements TransactionService {
         }
     }
 
-    private Transaction checkTransactionStatus(
-            Transaction entity, String transactionRef, String method) {
-
+    private Transaction checkTransactionStatus(Transaction transaction, String transactionRef, String method) {
         ProxyResponse proxyResponse = new ProxyResponse();
+        String currentStatus = transaction.getTransactionStatus();
 
-        // the first condition before the || operator is to catch already 
-        // captured transaction that their status is now void
-        
-        if (Methods.CAPTURE.equalsIgnoreCase(method) && entity.getTimeCaptured() != null
-                || entity.getTransactionStatus().equalsIgnoreCase(method)) {
+        boolean transactionAlreadyVoided = transaction.getTimeVoided() != null;
+        boolean isCapturingTransaction = Methods.CAPTURE.equalsIgnoreCase(method);
+        boolean methodHasBeenDoneBefore = currentStatus.equalsIgnoreCase(method);
+
+        if (methodHasBeenDoneBefore || (isCapturingTransaction && transactionAlreadyVoided)) {
+
             proxyResponse.setMessage("This transaction status is: " + method.toUpperCase());
             proxyResponse.setCode("RR-400");
             proxyResponse.setProvider("MOKA");
 
             proxyResponseService.saveFailedResponseToDB(proxyResponse, transactionRef, method);
 
-            return sendCorrectErrorResponse(method, transactionRef);
+            return sendErrorResponse(currentStatus, transactionRef);
         }
-
-        return entity;
-
+        return transaction;
     }
 
-    private Transaction sendCorrectErrorResponse(String method, String transactionRef) {
+    private Transaction sendErrorResponse(String transactionCurrentStatus, String transactionRef) {
 
-        if (method.equalsIgnoreCase(Methods.CAPTURE)) {
-            throw new TransactionAlreadyCapturedException(transactionRef);
+        if (transactionCurrentStatus.equalsIgnoreCase(Methods.CAPTURE)) {
+            String statusInPastTense = transactionCurrentStatus + "d";
+            throw new TransactionMethodAlreadyDoneException(transactionRef, statusInPastTense);
         }
 
-        if (method.equalsIgnoreCase(Methods.VOID)) {
-            throw new TransactionAlreadyVoidedException(transactionRef);
+        if (transactionCurrentStatus.equalsIgnoreCase(Methods.VOID)) {
+            String statusInPastTense = transactionCurrentStatus + "ed";
+            throw new TransactionMethodAlreadyDoneException(transactionRef, statusInPastTense);
         }
 
-        if (method.equalsIgnoreCase(Methods.REFUND)) {
-            throw new TransactionAlreadyRefundedException(transactionRef);
+        if (transactionCurrentStatus.equalsIgnoreCase(Methods.REFUND)) {
+            String statusInPastTense = transactionCurrentStatus + "ed";
+            throw new TransactionMethodAlreadyDoneException(transactionRef, statusInPastTense);
         }
 
         // If none of the above conditions match, throw an IllegalArgumentException
-        throw new IllegalArgumentException("Invalid method: " + method);
+        throw new IllegalArgumentException("Invalid status: " + transactionCurrentStatus);
     }
 }
