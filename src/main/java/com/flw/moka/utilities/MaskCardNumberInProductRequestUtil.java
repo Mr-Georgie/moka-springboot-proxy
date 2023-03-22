@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import com.flw.moka.entity.helpers.ProductRequest;
 
 @Component
-public class MaskCardNumberInProductRequestUtility {
+public class MaskCardNumberInProductRequestUtil {
 
     public ProductRequest mask(ProductRequest productRequest) {
         String maskedCardNumber = maskHandler(productRequest.getCardNo());

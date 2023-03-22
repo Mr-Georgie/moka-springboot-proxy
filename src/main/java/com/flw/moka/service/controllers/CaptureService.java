@@ -1,11 +1,9 @@
 package com.flw.moka.service.controllers;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Optional;
 
 import org.springframework.core.env.Environment;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -20,9 +18,8 @@ import com.flw.moka.entity.helpers.ProxyResponse;
 import com.flw.moka.service.entities.CardParamsService;
 import com.flw.moka.service.entities.ProxyResponseService;
 import com.flw.moka.service.entities.TransactionService;
-import com.flw.moka.utilities.DbUtility;
-import com.flw.moka.utilities.ProviderApiUtility;
-import com.flw.moka.utilities.TimeUtility;
+import com.flw.moka.utilities.EntityPreparationUtil;
+import com.flw.moka.utilities.ProviderApiUtil;
 
 import lombok.AllArgsConstructor;
 
@@ -30,55 +27,47 @@ import lombok.AllArgsConstructor;
 @Service
 public class CaptureService {
 
-    private Environment environment;
-    CardParamsService cardParamsService;
-    TransactionService transactionService;
-    ProxyResponseService proxyResponseService;
-    ProviderApiUtility providerApiUtility;
+	private Environment environment;
+	CardParamsService cardParamsService;
+	TransactionService transactionService;
+	ProxyResponseService proxyResponseService;
+	ProviderApiUtil providerApiUtil;
 
-    public ResponseEntity<ProxyResponse> sendProviderPayload(ProviderPayload providerPayload,
-            ProductRequest productRequest)
-            throws URISyntaxException {
+	public ResponseEntity<ProxyResponse> sendProviderPayload(ProviderPayload providerPayload,
+			ProductRequest productRequest) {
 
-        String authURI = environment.getProperty("provider.endpoints.capture");
+		String captureEndpoint = environment.getProperty("provider.endpoints.capture");
+		URI endpointURI = URI.create(captureEndpoint);
 
-        URI url = new URI(authURI);
+		String transactionReference = productRequest.getTransactionReference();
 
-        String productRef = productRequest.getTransactionReference();
+		Transaction transaction = transactionService.getTransaction(transactionReference, Methods.CAPTURE);
 
-        Transaction getTransactionIfNotCaptured = transactionService.getTransaction(productRef, "capture");
+		ResponseEntity<ProviderResponse> providerResponseEntity = providerApiUtil.makeProviderApiCall(endpointURI,
+				providerPayload);
+		Optional<ProviderResponse> providerResponse = providerApiUtil.handleNoProviderResponse(providerResponseEntity);
+		Optional<ProviderResponseData> providerResponseData = providerApiUtil.unwrapProviderResponse(providerResponse);
 
-        ResponseEntity<ProviderResponse> responseEntity = providerApiUtility.makeApiCall(url, providerPayload);
-        Optional<ProviderResponse> optionalBody = providerApiUtility.handleNoResponse(responseEntity);
-        Optional<ProviderResponseData> optionalData = providerApiUtility.unwrapResponse(optionalBody);
+		ProxyResponse proxyResponse = proxyResponseService.createProxyResponse(providerResponseData, providerResponse,
+				productRequest);
+		CardParams cardParams = prepareCardParams(proxyResponse, productRequest);
+		cardParamsService.saveCardParams(cardParams);
 
-        ProxyResponse proxyResponse = proxyResponseService.createProxyResponse(optionalData, optionalBody,
-                productRequest);
+		Transaction updatedTransaction = updateTransactionStatus(productRequest, transaction, proxyResponse);
+		transactionService.saveTransaction(updatedTransaction);
 
-        DbUtility dbUtility = new DbUtility(Methods.CAPTURE);
+		return ResponseEntity.ok(proxyResponse);
+	}
 
-        CardParams cardParams = dbUtility.setCardParams(proxyResponse, productRequest);
-        cardParamsService.saveCardParams(cardParams);
+	private CardParams prepareCardParams(ProxyResponse proxyResponse, ProductRequest productRequest) {
+		EntityPreparationUtil entityPreparationUtil = new EntityPreparationUtil(Methods.CAPTURE);
+		return entityPreparationUtil.setCardParams(proxyResponse, productRequest);
+	}
 
-        Transaction updatedTransaction = updateTransaction(productRequest, getTransactionIfNotCaptured, proxyResponse);
-        transactionService.saveTransaction(updatedTransaction);
-
-        return new ResponseEntity<>(proxyResponse, HttpStatus.CREATED);
-    }
-
-    static Transaction updateTransaction(ProductRequest productRequest, Transaction transaction,
-            ProxyResponse proxyResponse) {
-
-        TimeUtility timeUtility = new TimeUtility();
-
-        transaction.setAmount(productRequest.getAmount());
-        transaction.setExternalRef(proxyResponse.getExRef());
-        transaction.setMessage("successful");
-        transaction.setTransactionRef(productRequest.getTransactionReference());
-        transaction.setTransactionStatus(Methods.CAPTURE.toUpperCase());
-        transaction.setTimeCaptured(timeUtility.getDateTime());
-
-        return transaction;
-    }
+	private Transaction updateTransactionStatus(ProductRequest productRequest, Transaction transaction,
+			ProxyResponse proxyResponse) {
+		EntityPreparationUtil entityPreparationUtil = new EntityPreparationUtil(Methods.CAPTURE);
+		return entityPreparationUtil.updateTransactionStatus(productRequest, transaction, proxyResponse);
+	}
 
 }

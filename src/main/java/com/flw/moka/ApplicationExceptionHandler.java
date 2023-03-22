@@ -10,8 +10,8 @@ import com.flw.moka.entity.helpers.ProxyResponse;
 import com.flw.moka.exception.InvalidProductRequestException;
 import com.flw.moka.exception.NoMethodNamePassedException;
 import com.flw.moka.exception.TransactionAlreadyCapturedException;
-import com.flw.moka.exception.TransactionAlreadyRefundedException;
 import com.flw.moka.exception.TransactionAlreadyVoidedException;
+import com.flw.moka.exception.TransactionMethodAlreadyDoneException;
 import com.flw.moka.exception.TransactionNotCapturedException;
 import com.flw.moka.exception.TransactionNotFoundException;
 import com.flw.moka.exception.TransactionShouldBeRefundedException;
@@ -50,8 +50,9 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
         return new ResponseEntity<>(proxyResponse, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(TransactionAlreadyRefundedException.class)
-    protected ResponseEntity<Object> handleTransactionAlreadyRefundedException(TransactionAlreadyRefundedException ex) {
+    @ExceptionHandler(TransactionMethodAlreadyDoneException.class)
+    protected ResponseEntity<Object> handleTransactionMethodAlreadyDoneException(
+            TransactionMethodAlreadyDoneException ex) {
         ProxyResponse proxyResponse = new ProxyResponse(ex.getMessage());
         proxyResponse.setCode("RR-400");
         proxyResponse.setTxRef("N/A");

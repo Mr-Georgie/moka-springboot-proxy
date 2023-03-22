@@ -1,7 +1,6 @@
 package com.flw.moka.service.controllers;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Optional;
 
 import org.springframework.core.env.Environment;
@@ -20,10 +19,10 @@ import com.flw.moka.entity.helpers.ProxyResponse;
 import com.flw.moka.service.entities.CardParamsService;
 import com.flw.moka.service.entities.ProxyResponseService;
 import com.flw.moka.service.entities.TransactionService;
-import com.flw.moka.utilities.DbUtility;
-import com.flw.moka.utilities.MaskCardNumberInProductRequestUtility;
-import com.flw.moka.utilities.ProviderApiUtility;
-import com.flw.moka.utilities.TimeUtility;
+import com.flw.moka.utilities.EntityPreparationUtil;
+import com.flw.moka.utilities.MaskCardNumberInProductRequestUtil;
+import com.flw.moka.utilities.ProviderApiUtil;
+import com.flw.moka.utilities.TimeUtil;
 
 import lombok.AllArgsConstructor;
 
@@ -35,42 +34,44 @@ public class AuthService {
     CardParamsService cardParamsService;
     TransactionService transactionService;
     ProxyResponseService proxyResponseService;
-    ProviderApiUtility providerApiUtility;
-    MaskCardNumberInProductRequestUtility maskCardNumberInProductRequestUtility;
+    ProviderApiUtil providerApiUtil;
+    MaskCardNumberInProductRequestUtil maskCardNumberInProductRequestUtility;
 
     public ResponseEntity<ProxyResponse> sendProviderPayload(ProviderPayload providerPayload,
-            ProductRequest productRequest)
-            throws URISyntaxException {
+            ProductRequest productRequest) {
 
-        String authURI = environment.getProperty("provider.endpoints.authorize");
+        String authEndpoint = environment.getProperty("provider.endpoints.authorize");
+        URI endpointURI = URI.create(authEndpoint);
 
-        URI url = new URI(authURI);
-
-        ResponseEntity<ProviderResponse> responseEntity = providerApiUtility.makeApiCall(url, providerPayload);
-
-        Optional<ProviderResponse> optionalBody = providerApiUtility.handleNoResponse(responseEntity);
-
-        Optional<ProviderResponseData> optionalData = providerApiUtility.unwrapResponse(optionalBody);
+        ResponseEntity<ProviderResponse> responseEntity = providerApiUtil.makeProviderApiCall(
+                endpointURI, providerPayload);
+        Optional<ProviderResponse> providerResponseBody = providerApiUtil.handleNoProviderResponse(responseEntity);
+        Optional<ProviderResponseData> providerResponseData = providerApiUtil
+                .unwrapProviderResponse(providerResponseBody);
 
         ProductRequest productRequestWithMaskedCardNumber = maskCardNumberInProductRequestUtility.mask(productRequest);
 
-        ProxyResponse proxyResponse = proxyResponseService.createProxyResponse(optionalData, optionalBody,
+        ProxyResponse proxyResponse = proxyResponseService.createProxyResponse(providerResponseData,
+                providerResponseBody,
                 productRequestWithMaskedCardNumber);
 
-        DbUtility dbUtility = new DbUtility(Methods.AUTHORIZE);
-
-        CardParams cardParams = dbUtility.setCardParams(proxyResponse, productRequestWithMaskedCardNumber);
+        CardParams cardParams = prepareCardParams(proxyResponse, productRequestWithMaskedCardNumber);
         cardParamsService.saveCardParams(cardParams);
 
         Transaction transaction = setTransaction(productRequestWithMaskedCardNumber);
         transactionService.saveTransaction(transaction);
 
-        return new ResponseEntity<>(proxyResponse, HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(proxyResponse);
     }
 
-    static Transaction setTransaction(ProductRequest productRequest) {
+    private CardParams prepareCardParams(ProxyResponse proxyResponse, ProductRequest productRequest) {
+        EntityPreparationUtil entityPreparationUtil = new EntityPreparationUtil(Methods.AUTHORIZE);
+        return entityPreparationUtil.setCardParams(proxyResponse, productRequest);
+    }
 
-        TimeUtility timeUtility = new TimeUtility();
+    private Transaction setTransaction(ProductRequest productRequest) {
+
+        TimeUtil timeUtility = new TimeUtil();
         Transaction transaction = new Transaction();
 
         transaction.setAmount(productRequest.getAmount());

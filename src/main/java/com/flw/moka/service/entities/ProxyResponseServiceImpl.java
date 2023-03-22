@@ -11,7 +11,7 @@ import com.flw.moka.entity.helpers.ProviderResponseData;
 import com.flw.moka.entity.helpers.ProxyResponse;
 import com.flw.moka.repository.CardParamsRepository;
 import com.flw.moka.repository.ProxyResponseRepository;
-import com.flw.moka.utilities.TimeUtility;
+import com.flw.moka.utilities.TimeUtil;
 import com.google.gson.Gson;
 
 import lombok.AllArgsConstructor;
@@ -33,7 +33,7 @@ public class ProxyResponseServiceImpl implements ProxyResponseService {
             String transactionRef, String method) {
         CardParams cardParams = new CardParams();
         Gson json = new Gson();
-        TimeUtility timeUtility = new TimeUtility();
+        TimeUtil timeUtility = new TimeUtil();
 
         cardParams.setMethod(method);
         cardParams.setTimeIn(timeUtility.getDateTime());
