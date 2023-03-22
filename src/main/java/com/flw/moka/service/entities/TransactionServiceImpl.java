@@ -50,35 +50,28 @@ public class TransactionServiceImpl implements TransactionService {
         }
     }
 
-    private Transaction checkTransactionStatus(
-            Transaction entity, String transactionRef, String method) {
-
+    private Transaction checkTransactionStatus(Transaction transaction, String transactionRef, String method) {
         ProxyResponse proxyResponse = new ProxyResponse();
+        String currentStatus = transaction.getTransactionStatus();
 
-        String transactionCurrentStatus = entity.getTransactionStatus();
+        boolean transactionAlreadyVoided = transaction.getTimeVoided() != null;
+        boolean isCapturingTransaction = Methods.CAPTURE.equalsIgnoreCase(method);
+        boolean methodHasBeenDoneBefore = currentStatus.equalsIgnoreCase(method);
 
-        Boolean isTransactionAlreadyVoided = entity.getTimeVoided() != null;
+        if (methodHasBeenDoneBefore || (isCapturingTransaction && transactionAlreadyVoided)) {
 
-        Boolean isTryingToCaptureTransaction = Methods.CAPTURE.equalsIgnoreCase(method);
-
-        Boolean hasMethodBeenDoneBefore = transactionCurrentStatus.equalsIgnoreCase(method);
-
-        if (isTryingToCaptureTransaction && isTransactionAlreadyVoided
-                || hasMethodBeenDoneBefore) {
             proxyResponse.setMessage("This transaction status is: " + method.toUpperCase());
             proxyResponse.setCode("RR-400");
             proxyResponse.setProvider("MOKA");
 
             proxyResponseService.saveFailedResponseToDB(proxyResponse, transactionRef, method);
 
-            return sendCorrectErrorResponse(transactionCurrentStatus, transactionRef);
+            return sendErrorResponse(currentStatus, transactionRef);
         }
-
-        return entity;
-
+        return transaction;
     }
 
-    private Transaction sendCorrectErrorResponse(String transactionCurrentStatus, String transactionRef) {
+    private Transaction sendErrorResponse(String transactionCurrentStatus, String transactionRef) {
 
         if (transactionCurrentStatus.equalsIgnoreCase(Methods.CAPTURE)) {
             String statusInPastTense = transactionCurrentStatus + "d";
