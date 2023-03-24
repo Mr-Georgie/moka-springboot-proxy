@@ -28,7 +28,7 @@ public class CardParams {
     @Column(name = "tx_ref", nullable = false)
     private String transactionRef;
 
-    @Column(name = "ex_ref", nullable = false)
+    @Column(name = "ex_ref", nullable = true)
     private String externalRef;
 
     @Column(name = "method", nullable = false)

@@ -25,7 +25,7 @@ public class EntityPreparationUtil {
         String jsonProductRequest = gson.toJson(productRequest);
         String jsonProxyResponse = gson.toJson(proxyResponse);
 
-        cardParams.setExternalRef("This is the error");
+        cardParams.setExternalRef(proxyResponse.getExRef());
         cardParams.setBody(jsonProductRequest);
         cardParams.setMethod(method);
         cardParams.setResponse(jsonProxyResponse);
