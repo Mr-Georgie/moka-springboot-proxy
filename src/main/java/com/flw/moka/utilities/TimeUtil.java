@@ -9,7 +9,9 @@ import java.util.Date;
 public class TimeUtil {
 
     public String getDateTime() {
-        return getCurrentTimeUsingDate();
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return now.format(formatter);
     }
 
     public Boolean isTransactionUpTo24Hours(String dateString) throws ParseException {
@@ -24,13 +26,7 @@ public class TimeUtil {
         return timeOneDayAgoMillis >= transactionTimeMillis;
     }
 
-    static String getCurrentTimeUsingDate() {
-        LocalDateTime now = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        return now.format(formatter);
-    }
-
-    static Long timeInMilliSec(String dateString) throws ParseException {
+    private static Long timeInMilliSec(String dateString) throws ParseException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
         Date date = dateFormat.parse(dateString);
