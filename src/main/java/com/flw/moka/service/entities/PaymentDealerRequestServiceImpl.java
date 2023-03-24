@@ -18,7 +18,7 @@ public class PaymentDealerRequestServiceImpl implements PaymentDealerRequestServ
     PaymentDealerRequest requestPayload;
 
     @Override
-    public PaymentDealerRequest saveRequestPayload(ProductRequest productRequest, String method) {
+    public PaymentDealerRequest createRequestPayload(ProductRequest productRequest, String method) {
 
         if (method.equalsIgnoreCase(Methods.AUTHORIZE)) {
             requestPayload = saveAuthPayload(productRequest);
@@ -56,16 +56,16 @@ public class PaymentDealerRequestServiceImpl implements PaymentDealerRequestServ
     }
 
     private PaymentDealerRequest saveVoidPayload(ProductRequest productRequest) {
-        Long voidRefundReason = productRequest.getVoidRefundReason();
+        int voidRefundReason = 2;
         String transactionReference = productRequest.getTransactionReference();
 
         return paymentDealerRequestRepository.setVoidPayload(voidRefundReason, transactionReference);
     }
 
     private PaymentDealerRequest saveRefundPayload(ProductRequest productRequest) {
-        Long amount = productRequest.getVoidRefundReason();
+        Long amount = productRequest.getAmount();
         String transactionReference = productRequest.getTransactionReference();
 
-        return paymentDealerRequestRepository.setVoidPayload(amount, transactionReference);
+        return paymentDealerRequestRepository.setRefundPayload(amount, transactionReference);
     }
 }

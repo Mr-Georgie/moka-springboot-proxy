@@ -16,6 +16,7 @@ import com.flw.moka.exception.InvalidProductRequestException;
 import com.flw.moka.service.controllers.AuthService;
 import com.flw.moka.service.entities.PaymentDealerRequestService;
 import com.flw.moka.service.entities.ProviderPayloadService;
+import com.flw.moka.utilities.GenerateReferenceUtil;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -28,6 +29,7 @@ public class AuthorizeController {
         ProviderPayloadService providerPayloadService;
         PaymentDealerRequestService paymentDealerRequestService;
         AuthService authService;
+        GenerateReferenceUtil generateReferenceUtil;
 
         @PostMapping(path = "/authorize", consumes = "application/json", produces = "application/json")
         public ResponseEntity<ProxyResponse> saveCardParams(@Valid @RequestBody ProductRequest productRequest,
@@ -38,13 +40,17 @@ public class AuthorizeController {
                         throw new InvalidProductRequestException(bindingResult);
                 }
 
-                PaymentDealerRequest paymentDealerRequest = paymentDealerRequestService.saveRequestPayload(
+                productRequest.setTransactionReference(generateReferenceUtil.generateRandom("TUR"));
+
+                PaymentDealerRequest newPaymentDealerRequest = paymentDealerRequestService.createRequestPayload(
                                 productRequest,
                                 Methods.AUTHORIZE);
-                ProviderPayload providerPayload = providerPayloadService
-                                .savePaymentDealerAuthAndReq(paymentDealerRequest);
 
-                ResponseEntity<ProxyResponse> responseEntity = authService.sendProviderPayload(providerPayload,
+                ProviderPayload newProviderPayload = providerPayloadService
+                                .savePaymentDealerAuthAndReq(newPaymentDealerRequest);
+
+                ResponseEntity<ProxyResponse> responseEntity = authService.sendProviderPayload(
+                                newProviderPayload,
                                 productRequest);
 
                 return responseEntity;

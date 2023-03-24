@@ -49,7 +49,7 @@ public class CaptureService {
 		Optional<ProviderResponseData> providerResponseData = providerApiUtil.unwrapProviderResponse(providerResponse);
 
 		ProxyResponse proxyResponse = proxyResponseService.createProxyResponse(providerResponseData, providerResponse,
-				productRequest);
+				productRequest, Methods.CAPTURE);
 		CardParams cardParams = prepareCardParams(proxyResponse, productRequest);
 		cardParamsService.saveCardParams(cardParams);
 

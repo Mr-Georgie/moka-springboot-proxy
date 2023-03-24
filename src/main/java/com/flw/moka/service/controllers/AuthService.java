@@ -53,7 +53,9 @@ public class AuthService {
 
         ProxyResponse proxyResponse = proxyResponseService.createProxyResponse(providerResponseData,
                 providerResponseBody,
-                productRequestWithMaskedCardNumber);
+                productRequestWithMaskedCardNumber, Methods.AUTHORIZE);
+
+        productRequest.setExternalReference(proxyResponse.getExRef());
 
         CardParams cardParams = prepareCardParams(proxyResponse, productRequestWithMaskedCardNumber);
         cardParamsService.saveCardParams(cardParams);
@@ -77,15 +79,15 @@ public class AuthService {
         transaction.setAmount(productRequest.getAmount());
         transaction.setCountry(productRequest.getCountry());
         transaction.setCurrency(productRequest.getCurrency());
-        transaction.setEmail(productRequest.getEmail());
         transaction.setExternalRef(productRequest.getExternalReference());
         transaction.setMask(productRequest.getCardNo());
-        transaction.setMessage("successful");
-        transaction.setNarration(productRequest.getNarration());
-        transaction.setProvider("MOKA");
         transaction.setTimeAuthorized(timeUtility.getDateTime());
         transaction.setTransactionRef(productRequest.getTransactionReference());
         transaction.setTransactionStatus(Methods.AUTHORIZE.toUpperCase());
+        transaction.setResponseMessage("Pending Capture");
+        transaction.setResponseCode("02");
+        transaction.setNarration("CARD Transaction");
+        transaction.setProvider("MOKA");
 
         return transaction;
     }

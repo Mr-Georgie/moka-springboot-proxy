@@ -21,7 +21,6 @@ import com.flw.moka.service.entities.ProxyResponseService;
 import com.flw.moka.service.entities.TransactionService;
 import com.flw.moka.utilities.EntityPreparationUtil;
 import com.flw.moka.utilities.ProviderApiUtil;
-import com.flw.moka.utilities.ShouldVoidOrRefundUtil;
 
 import lombok.AllArgsConstructor;
 
@@ -33,19 +32,14 @@ public class VoidService {
 	TransactionService transactionService;
 	ProxyResponseService proxyResponseService;
 	ProviderApiUtil providerApiUtil;
-	ShouldVoidOrRefundUtil shouldVoidOrRefundUtility;
 
 	public ResponseEntity<ProxyResponse> sendProviderPayload(ProviderPayload providerPayload,
-			ProductRequest productRequest)
+			ProductRequest productRequest,
+			Transaction transaction)
 			throws ParseException {
 
 		String voidEndpoint = environment.getProperty("provider.endpoints.void");
 		URI endpointURI = URI.create(voidEndpoint);
-
-		String productRef = productRequest.getTransactionReference();
-
-		Transaction transactionNotVoided = transactionService.getTransaction(productRef, Methods.VOID);
-		shouldVoidOrRefundUtility.routeTransaction(transactionNotVoided.getTimeCaptured(), Methods.VOID);
 
 		ResponseEntity<ProviderResponse> responseEntity = providerApiUtil.makeProviderApiCall(
 				endpointURI,
@@ -56,12 +50,12 @@ public class VoidService {
 
 		ProxyResponse proxyResponse = proxyResponseService.createProxyResponse(providerResponseData,
 				providerResponseBody,
-				productRequest);
+				productRequest, Methods.VOID);
 
 		CardParams cardParams = prepareCardParams(proxyResponse, productRequest);
 		cardParamsService.saveCardParams(cardParams);
 
-		Transaction updatedTransaction = updateTransactionStatus(productRequest, transactionNotVoided, proxyResponse);
+		Transaction updatedTransaction = updateTransactionStatus(productRequest, transaction, proxyResponse);
 		transactionService.saveTransaction(updatedTransaction);
 
 		return ResponseEntity.ok(proxyResponse);

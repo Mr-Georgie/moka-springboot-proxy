@@ -40,15 +40,20 @@ public class EntityPreparationUtil {
         TimeUtil timeUtility = new TimeUtil();
 
         transaction.setExternalRef(proxyResponse.getExRef());
-        transaction.setMessage("successful");
         transaction.setTransactionRef(productRequest.getTransactionReference());
         transaction.setTransactionStatus(method.toUpperCase());
 
         if (method.equalsIgnoreCase(Methods.CAPTURE)) {
+            transaction.setResponseCode("00");
+            transaction.setResponseMessage("Successful");
             transaction.setTimeCaptured(timeUtility.getDateTime());
         } else if (method.equalsIgnoreCase(Methods.REFUND)) {
+            transaction.setResponseCode("00 - Refunded");
+            transaction.setResponseMessage("Transaction refunded successfully");
             transaction.setTimeRefunded(timeUtility.getDateTime());
         } else if (method.equalsIgnoreCase(Methods.VOID)) {
+            transaction.setResponseCode("00 - Voided");
+            transaction.setResponseMessage("Transaction voided successfully");
             transaction.setTimeVoided(timeUtility.getDateTime());
         }
 

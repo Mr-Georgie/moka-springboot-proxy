@@ -61,12 +61,12 @@ public class Transaction {
     @Column(name = "country", nullable = true)
     private String country;
 
-    @Column(name = "email", nullable = true)
-    private String email;
-
     @Column(name = "narration", nullable = true)
     private String narration;
 
-    @Column(name = "message", nullable = true)
-    private String message;
+    @Column(name = "response_message", nullable = false)
+    private String responseMessage;
+
+    @Column(name = "response_code", nullable = false)
+    private String responseCode;
 }

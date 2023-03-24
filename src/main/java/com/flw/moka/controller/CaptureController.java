@@ -32,13 +32,14 @@ public class CaptureController {
         public ResponseEntity<ProxyResponse> saveCardParams(@RequestBody ProductRequest productRequest)
                         throws URISyntaxException {
 
-                PaymentDealerRequest paymentDealerRequest = paymentDealerRequestService.saveRequestPayload(
+                PaymentDealerRequest newPaymentDealerRequest = paymentDealerRequestService.createRequestPayload(
                                 productRequest,
                                 Methods.CAPTURE);
-                ProviderPayload providerPayload = providerPayloadService
-                                .savePaymentDealerAuthAndReq(paymentDealerRequest);
+                ProviderPayload newProviderPayload = providerPayloadService
+                                .savePaymentDealerAuthAndReq(newPaymentDealerRequest);
 
-                ResponseEntity<ProxyResponse> responseEntity = captureService.sendProviderPayload(providerPayload,
+                ResponseEntity<ProxyResponse> responseEntity = captureService.sendProviderPayload(
+                                newProviderPayload,
                                 productRequest);
 
                 return responseEntity;

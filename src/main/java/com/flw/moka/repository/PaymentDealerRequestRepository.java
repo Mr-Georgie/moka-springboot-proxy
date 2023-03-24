@@ -32,8 +32,15 @@ public class PaymentDealerRequestRepository {
         return paymentDealerRequest;
     }
 
-    public PaymentDealerRequest setVoidPayload(Long voidRefundReason, String transactionReference) {
+    public PaymentDealerRequest setVoidPayload(int voidRefundReason, String transactionReference) {
         paymentDealerRequest.setVoidRefundReason(voidRefundReason);
+        paymentDealerRequest.setOtherTrxCode(transactionReference);
+
+        return paymentDealerRequest;
+    }
+
+    public PaymentDealerRequest setRefundPayload(Long amount, String transactionReference) {
+        paymentDealerRequest.setAmount(amount);
         paymentDealerRequest.setOtherTrxCode(transactionReference);
 
         return paymentDealerRequest;

@@ -14,9 +14,9 @@ import com.flw.moka.entity.helpers.PaymentDealerRequest;
 import com.flw.moka.entity.helpers.ProductRequest;
 import com.flw.moka.entity.helpers.ProviderPayload;
 import com.flw.moka.entity.helpers.ProxyResponse;
-import com.flw.moka.service.controllers.VoidService;
 import com.flw.moka.service.entities.PaymentDealerRequestService;
 import com.flw.moka.service.entities.ProviderPayloadService;
+import com.flw.moka.utilities.VoidRefundRouterUtil;
 
 import lombok.AllArgsConstructor;
 
@@ -24,24 +24,21 @@ import lombok.AllArgsConstructor;
 @RestController
 @RequestMapping("/api")
 public class VoidController {
-        ProviderPayloadService providerPayloadService;
-        PaymentDealerRequestService paymentDealerRequestService;
-        VoidService voidService;
+    ProviderPayloadService providerPayloadService;
+    PaymentDealerRequestService paymentDealerRequestService;
+    VoidRefundRouterUtil voidRefundRouterUtil;
 
-        @PostMapping(path = "/void", consumes = "application/json", produces = "application/json")
-        public ResponseEntity<ProxyResponse> saveCardParams(@RequestBody ProductRequest productRequest)
-                        throws URISyntaxException, ParseException {
+    @PostMapping(path = "/void", consumes = "application/json", produces = "application/json")
+    public ResponseEntity<ProxyResponse> saveCardParams(@RequestBody ProductRequest productRequest)
+            throws URISyntaxException, ParseException {
 
-                PaymentDealerRequest paymentDealerRequest = paymentDealerRequestService.saveRequestPayload(
-                                productRequest,
-                                Methods.VOID);
-                ProviderPayload providerPayload = providerPayloadService
-                                .savePaymentDealerAuthAndReq(paymentDealerRequest);
+        PaymentDealerRequest newPaymentDealerRequest = paymentDealerRequestService.createRequestPayload(
+                productRequest,
+                Methods.VOID);
+        ProviderPayload newProviderPayload = providerPayloadService
+                .savePaymentDealerAuthAndReq(newPaymentDealerRequest);
 
-                ResponseEntity<ProxyResponse> responseEntity = voidService.sendProviderPayload(providerPayload,
-                                productRequest);
+        return voidRefundRouterUtil.route(productRequest, newProviderPayload, Methods.VOID);
 
-                return responseEntity;
-
-        }
+    }
 }

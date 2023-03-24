@@ -8,9 +8,13 @@ import com.flw.moka.entity.helpers.ProviderResponseData;
 import com.flw.moka.entity.helpers.ProxyResponse;
 
 public interface ProxyResponseService {
-    ProxyResponse createProxyResponse(Optional<ProviderResponseData> dataEntity, Optional<ProviderResponse> bodyEntity,
-            ProductRequest productRequest);
+        ProxyResponse createProxyResponse(Optional<ProviderResponseData> dataEntity,
+                        Optional<ProviderResponse> bodyEntity,
+                        ProductRequest productRequest, String method);
 
-    void saveFailedResponseToDB(ProxyResponse proxyResponse,
-            String transactionRef, String method);
+        void saveFailedResponseToDB(ProxyResponse proxyResponse,
+                        String transactionRef, String method);
+
+        public <T> T sendMethodAlreadyDoneResponse(String transactionCurrentStatus, String transactionRef,
+                        Class<T> returnType);
 }
