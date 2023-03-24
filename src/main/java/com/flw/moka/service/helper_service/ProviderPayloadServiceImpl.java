@@ -1,12 +1,12 @@
-package com.flw.moka.service.entities;
+package com.flw.moka.service.helper_service;
 
 import org.springframework.stereotype.Service;
 
 import com.flw.moka.entity.helpers.PaymentDealerAuthentication;
 import com.flw.moka.entity.helpers.PaymentDealerRequest;
 import com.flw.moka.entity.helpers.ProviderPayload;
-import com.flw.moka.repository.PaymentDealerAuthenticationRepository;
-import com.flw.moka.repository.ProviderPayloadRepository;
+import com.flw.moka.repository.helper_repos.PaymentDealerAuthenticationRepository;
+import com.flw.moka.repository.helper_repos.ProviderPayloadRepository;
 
 import lombok.AllArgsConstructor;
 

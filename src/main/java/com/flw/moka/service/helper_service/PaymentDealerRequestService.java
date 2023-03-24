@@ -1,8 +1,8 @@
-package com.flw.moka.service.entities;
+package com.flw.moka.service.helper_service;
 
 import com.flw.moka.entity.helpers.PaymentDealerRequest;
 import com.flw.moka.entity.helpers.ProductRequest;
 
 public interface PaymentDealerRequestService {
-    PaymentDealerRequest saveRequestPayload(ProductRequest productRequest, String method);
+    PaymentDealerRequest createRequestPayload(ProductRequest productRequest, String method);
 }

@@ -1,4 +1,4 @@
-package com.flw.moka.service.controllers;
+package com.flw.moka.service.controller_service;
 
 import java.net.URI;
 import java.util.Optional;
@@ -16,9 +16,9 @@ import com.flw.moka.entity.helpers.ProviderPayload;
 import com.flw.moka.entity.helpers.ProviderResponse;
 import com.flw.moka.entity.helpers.ProviderResponseData;
 import com.flw.moka.entity.helpers.ProxyResponse;
-import com.flw.moka.service.entities.CardParamsService;
-import com.flw.moka.service.entities.ProxyResponseService;
-import com.flw.moka.service.entities.TransactionService;
+import com.flw.moka.service.entity_service.CardParamsService;
+import com.flw.moka.service.entity_service.TransactionService;
+import com.flw.moka.service.helper_service.ProxyResponseService;
 import com.flw.moka.utilities.EntityPreparationUtil;
 import com.flw.moka.utilities.MaskCardNumberInProductRequestUtil;
 import com.flw.moka.utilities.ProviderApiUtil;
@@ -53,7 +53,9 @@ public class AuthService {
 
         ProxyResponse proxyResponse = proxyResponseService.createProxyResponse(providerResponseData,
                 providerResponseBody,
-                productRequestWithMaskedCardNumber);
+                productRequestWithMaskedCardNumber, Methods.AUTHORIZE);
+
+        productRequest.setExternalReference(proxyResponse.getExRef());
 
         CardParams cardParams = prepareCardParams(proxyResponse, productRequestWithMaskedCardNumber);
         cardParamsService.saveCardParams(cardParams);
@@ -77,15 +79,15 @@ public class AuthService {
         transaction.setAmount(productRequest.getAmount());
         transaction.setCountry(productRequest.getCountry());
         transaction.setCurrency(productRequest.getCurrency());
-        transaction.setEmail(productRequest.getEmail());
         transaction.setExternalRef(productRequest.getExternalReference());
         transaction.setMask(productRequest.getCardNo());
-        transaction.setMessage("successful");
-        transaction.setNarration(productRequest.getNarration());
-        transaction.setProvider("MOKA");
         transaction.setTimeAuthorized(timeUtility.getDateTime());
         transaction.setTransactionRef(productRequest.getTransactionReference());
         transaction.setTransactionStatus(Methods.AUTHORIZE.toUpperCase());
+        transaction.setResponseMessage("Pending Capture");
+        transaction.setResponseCode("02");
+        transaction.setNarration("CARD Transaction");
+        transaction.setProvider("MOKA");
 
         return transaction;
     }

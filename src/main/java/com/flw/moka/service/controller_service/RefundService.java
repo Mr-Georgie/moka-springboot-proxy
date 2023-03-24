@@ -1,4 +1,4 @@
-package com.flw.moka.service.controllers;
+package com.flw.moka.service.controller_service;
 
 import java.net.URI;
 import java.text.ParseException;
@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.flw.moka.entity.CardParams;
+import com.flw.moka.entity.Refunds;
 import com.flw.moka.entity.Transaction;
 import com.flw.moka.entity.helpers.Methods;
 import com.flw.moka.entity.helpers.ProductRequest;
@@ -16,66 +17,58 @@ import com.flw.moka.entity.helpers.ProviderPayload;
 import com.flw.moka.entity.helpers.ProviderResponse;
 import com.flw.moka.entity.helpers.ProviderResponseData;
 import com.flw.moka.entity.helpers.ProxyResponse;
-import com.flw.moka.service.entities.CardParamsService;
-import com.flw.moka.service.entities.ProxyResponseService;
-import com.flw.moka.service.entities.TransactionService;
+import com.flw.moka.service.entity_service.CardParamsService;
+import com.flw.moka.service.entity_service.RefundsService;
+import com.flw.moka.service.helper_service.ProxyResponseService;
 import com.flw.moka.utilities.EntityPreparationUtil;
 import com.flw.moka.utilities.ProviderApiUtil;
-import com.flw.moka.utilities.ShouldVoidOrRefundUtil;
 
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 @Service
-public class VoidService {
+public class RefundService {
 	private Environment environment;
 	CardParamsService cardParamsService;
-	TransactionService transactionService;
+	RefundsService refundsService;
 	ProxyResponseService proxyResponseService;
 	ProviderApiUtil providerApiUtil;
-	ShouldVoidOrRefundUtil shouldVoidOrRefundUtility;
 
 	public ResponseEntity<ProxyResponse> sendProviderPayload(ProviderPayload providerPayload,
-			ProductRequest productRequest)
+			ProductRequest productRequest, Transaction transaction)
 			throws ParseException {
 
-		String voidEndpoint = environment.getProperty("provider.endpoints.void");
-		URI endpointURI = URI.create(voidEndpoint);
-
-		String productRef = productRequest.getTransactionReference();
-
-		Transaction transactionNotVoided = transactionService.getTransaction(productRef, Methods.VOID);
-		shouldVoidOrRefundUtility.routeTransaction(transactionNotVoided.getTimeCaptured(), Methods.VOID);
+		String refundEndpoint = environment.getProperty("provider.endpoints.refund");
+		URI endpointURI = URI.create(refundEndpoint);
 
 		ResponseEntity<ProviderResponse> responseEntity = providerApiUtil.makeProviderApiCall(
 				endpointURI,
 				providerPayload);
+
 		Optional<ProviderResponse> providerResponseBody = providerApiUtil.handleNoProviderResponse(responseEntity);
 		Optional<ProviderResponseData> providerResponseData = providerApiUtil
 				.unwrapProviderResponse(providerResponseBody);
 
 		ProxyResponse proxyResponse = proxyResponseService.createProxyResponse(providerResponseData,
 				providerResponseBody,
-				productRequest);
+				productRequest, Methods.REFUND);
 
 		CardParams cardParams = prepareCardParams(proxyResponse, productRequest);
 		cardParamsService.saveCardParams(cardParams);
 
-		Transaction updatedTransaction = updateTransactionStatus(productRequest, transactionNotVoided, proxyResponse);
-		transactionService.saveTransaction(updatedTransaction);
+		Refunds newRefund = createNewRefund(transaction, proxyResponse);
+		refundsService.saveRefund(newRefund);
 
 		return ResponseEntity.ok(proxyResponse);
 	}
 
 	private CardParams prepareCardParams(ProxyResponse proxyResponse, ProductRequest productRequest) {
-		EntityPreparationUtil entityPreparationUtil = new EntityPreparationUtil(Methods.VOID);
+		EntityPreparationUtil entityPreparationUtil = new EntityPreparationUtil(Methods.REFUND);
 		return entityPreparationUtil.setCardParams(proxyResponse, productRequest);
 	}
 
-	private Transaction updateTransactionStatus(ProductRequest productRequest, Transaction transaction,
-			ProxyResponse proxyResponse) {
-		EntityPreparationUtil entityPreparationUtil = new EntityPreparationUtil(Methods.VOID);
-		return entityPreparationUtil.updateTransactionStatus(productRequest, transaction, proxyResponse);
+	private Refunds createNewRefund(Transaction transaction, ProxyResponse proxyResponse) {
+		EntityPreparationUtil entityPreparationUtil = new EntityPreparationUtil(Methods.REFUND);
+		return entityPreparationUtil.setRefund(transaction, proxyResponse);
 	}
-
 }

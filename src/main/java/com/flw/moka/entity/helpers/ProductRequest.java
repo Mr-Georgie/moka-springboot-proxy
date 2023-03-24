@@ -30,9 +30,9 @@ public class ProductRequest {
     @NotBlank(message = "ExpiryMonth cannot be blank")
     private String expiryMonth;
 
-    @NotNull(message = "Provider cannot be null")
-    @NotBlank(message = "Provider cannot be blank")
-    private String provider;
+    @NotNull(message = "authModel cannot be null")
+    @NotBlank(message = "authModel cannot be blank")
+    private String authModel;
 
     @NotNull(message = "ExpiryYear cannot be null")
     @NotBlank(message = "ExpiryYear cannot be blank")
@@ -48,16 +48,7 @@ public class ProductRequest {
 
     private String transactionReference;
     private String customerIp;
-    private String phoneNumber;
-    private String billingState;
     private String responseUrl;
     private String externalReference;
-    private String cardholderName;
-    private String email;
-    private String billingCity;
-    private Long voidRefundReason;
-    private String billingCountry;
-    private String narration;
-    private String customerId;
-    private String billingZip;
+    private int voidRefundReason;
 }

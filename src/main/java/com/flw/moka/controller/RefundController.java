@@ -9,14 +9,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.flw.moka.controller.custom_router.VoidRefundRouter;
 import com.flw.moka.entity.helpers.Methods;
 import com.flw.moka.entity.helpers.PaymentDealerRequest;
 import com.flw.moka.entity.helpers.ProductRequest;
 import com.flw.moka.entity.helpers.ProviderPayload;
 import com.flw.moka.entity.helpers.ProxyResponse;
-import com.flw.moka.service.controllers.RefundService;
-import com.flw.moka.service.entities.PaymentDealerRequestService;
-import com.flw.moka.service.entities.ProviderPayloadService;
+import com.flw.moka.service.helper_service.PaymentDealerRequestService;
+import com.flw.moka.service.helper_service.ProviderPayloadService;
 
 import lombok.AllArgsConstructor;
 
@@ -26,22 +26,19 @@ import lombok.AllArgsConstructor;
 public class RefundController {
         ProviderPayloadService providerPayloadService;
         PaymentDealerRequestService paymentDealerRequestService;
-        RefundService refundService;
+        VoidRefundRouter voidRefundRouterUtil;
 
         @PostMapping(path = "/refund", consumes = "application/json", produces = "application/json")
         public ResponseEntity<ProxyResponse> saveCardParams(@RequestBody ProductRequest productRequest)
                         throws URISyntaxException, ParseException {
 
-                PaymentDealerRequest paymentDealerRequest = paymentDealerRequestService.saveRequestPayload(
+                PaymentDealerRequest newPaymentDealerRequest = paymentDealerRequestService.createRequestPayload(
                                 productRequest,
                                 Methods.REFUND);
-                ProviderPayload providerPayload = providerPayloadService
-                                .savePaymentDealerAuthAndReq(paymentDealerRequest);
+                ProviderPayload newProviderPayload = providerPayloadService
+                                .savePaymentDealerAuthAndReq(newPaymentDealerRequest);
 
-                ResponseEntity<ProxyResponse> responseEntity = refundService.sendProviderPayload(providerPayload,
-                                productRequest);
-
-                return responseEntity;
+                return voidRefundRouterUtil.route(productRequest, newProviderPayload, Methods.REFUND);
 
         }
 }

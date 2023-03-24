@@ -38,7 +38,7 @@ public class PaymentDealerRequest {
 
     @JsonProperty("VoidRefundReason")
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private Long VoidRefundReason;
+    private int VoidRefundReason;
 
     @JsonProperty("Currency")
     @JsonInclude(JsonInclude.Include.NON_NULL)

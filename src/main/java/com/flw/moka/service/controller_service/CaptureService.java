@@ -1,4 +1,4 @@
-package com.flw.moka.service.controllers;
+package com.flw.moka.service.controller_service;
 
 import java.net.URI;
 import java.util.Optional;
@@ -15,9 +15,9 @@ import com.flw.moka.entity.helpers.ProviderPayload;
 import com.flw.moka.entity.helpers.ProviderResponse;
 import com.flw.moka.entity.helpers.ProviderResponseData;
 import com.flw.moka.entity.helpers.ProxyResponse;
-import com.flw.moka.service.entities.CardParamsService;
-import com.flw.moka.service.entities.ProxyResponseService;
-import com.flw.moka.service.entities.TransactionService;
+import com.flw.moka.service.entity_service.CardParamsService;
+import com.flw.moka.service.entity_service.TransactionService;
+import com.flw.moka.service.helper_service.ProxyResponseService;
 import com.flw.moka.utilities.EntityPreparationUtil;
 import com.flw.moka.utilities.ProviderApiUtil;
 
@@ -49,7 +49,7 @@ public class CaptureService {
 		Optional<ProviderResponseData> providerResponseData = providerApiUtil.unwrapProviderResponse(providerResponse);
 
 		ProxyResponse proxyResponse = proxyResponseService.createProxyResponse(providerResponseData, providerResponse,
-				productRequest);
+				productRequest, Methods.CAPTURE);
 		CardParams cardParams = prepareCardParams(proxyResponse, productRequest);
 		cardParamsService.saveCardParams(cardParams);
 

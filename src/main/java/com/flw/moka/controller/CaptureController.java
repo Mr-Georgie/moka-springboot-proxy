@@ -13,9 +13,9 @@ import com.flw.moka.entity.helpers.PaymentDealerRequest;
 import com.flw.moka.entity.helpers.ProductRequest;
 import com.flw.moka.entity.helpers.ProviderPayload;
 import com.flw.moka.entity.helpers.ProxyResponse;
-import com.flw.moka.service.controllers.CaptureService;
-import com.flw.moka.service.entities.PaymentDealerRequestService;
-import com.flw.moka.service.entities.ProviderPayloadService;
+import com.flw.moka.service.controller_service.CaptureService;
+import com.flw.moka.service.helper_service.PaymentDealerRequestService;
+import com.flw.moka.service.helper_service.ProviderPayloadService;
 
 import lombok.AllArgsConstructor;
 
@@ -32,13 +32,14 @@ public class CaptureController {
         public ResponseEntity<ProxyResponse> saveCardParams(@RequestBody ProductRequest productRequest)
                         throws URISyntaxException {
 
-                PaymentDealerRequest paymentDealerRequest = paymentDealerRequestService.saveRequestPayload(
+                PaymentDealerRequest newPaymentDealerRequest = paymentDealerRequestService.createRequestPayload(
                                 productRequest,
                                 Methods.CAPTURE);
-                ProviderPayload providerPayload = providerPayloadService
-                                .savePaymentDealerAuthAndReq(paymentDealerRequest);
+                ProviderPayload newProviderPayload = providerPayloadService
+                                .savePaymentDealerAuthAndReq(newPaymentDealerRequest);
 
-                ResponseEntity<ProxyResponse> responseEntity = captureService.sendProviderPayload(providerPayload,
+                ResponseEntity<ProxyResponse> responseEntity = captureService.sendProviderPayload(
+                                newProviderPayload,
                                 productRequest);
 
                 return responseEntity;

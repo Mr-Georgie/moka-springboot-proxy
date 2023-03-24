@@ -1,4 +1,4 @@
-package com.flw.moka.repository;
+package com.flw.moka.repository.entity_repos;
 
 import java.util.List;
 

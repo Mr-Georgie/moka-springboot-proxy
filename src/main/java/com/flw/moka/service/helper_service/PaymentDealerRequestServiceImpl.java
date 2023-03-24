@@ -1,4 +1,4 @@
-package com.flw.moka.service.entities;
+package com.flw.moka.service.helper_service;
 
 import org.springframework.stereotype.Service;
 
@@ -6,7 +6,7 @@ import com.flw.moka.entity.helpers.Methods;
 import com.flw.moka.entity.helpers.PaymentDealerRequest;
 import com.flw.moka.entity.helpers.ProductRequest;
 import com.flw.moka.exception.NoMethodNamePassedException;
-import com.flw.moka.repository.PaymentDealerRequestRepository;
+import com.flw.moka.repository.helper_repos.PaymentDealerRequestRepository;
 
 import lombok.AllArgsConstructor;
 
@@ -18,7 +18,7 @@ public class PaymentDealerRequestServiceImpl implements PaymentDealerRequestServ
     PaymentDealerRequest requestPayload;
 
     @Override
-    public PaymentDealerRequest saveRequestPayload(ProductRequest productRequest, String method) {
+    public PaymentDealerRequest createRequestPayload(ProductRequest productRequest, String method) {
 
         if (method.equalsIgnoreCase(Methods.AUTHORIZE)) {
             requestPayload = saveAuthPayload(productRequest);
@@ -56,16 +56,16 @@ public class PaymentDealerRequestServiceImpl implements PaymentDealerRequestServ
     }
 
     private PaymentDealerRequest saveVoidPayload(ProductRequest productRequest) {
-        Long voidRefundReason = productRequest.getVoidRefundReason();
+        int voidRefundReason = 2;
         String transactionReference = productRequest.getTransactionReference();
 
         return paymentDealerRequestRepository.setVoidPayload(voidRefundReason, transactionReference);
     }
 
     private PaymentDealerRequest saveRefundPayload(ProductRequest productRequest) {
-        Long amount = productRequest.getVoidRefundReason();
+        Long amount = productRequest.getAmount();
         String transactionReference = productRequest.getTransactionReference();
 
-        return paymentDealerRequestRepository.setVoidPayload(amount, transactionReference);
+        return paymentDealerRequestRepository.setRefundPayload(amount, transactionReference);
     }
 }

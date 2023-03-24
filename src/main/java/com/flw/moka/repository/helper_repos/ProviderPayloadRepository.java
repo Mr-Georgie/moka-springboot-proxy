@@ -1,4 +1,4 @@
-package com.flw.moka.repository;
+package com.flw.moka.repository.helper_repos;
 
 import org.springframework.stereotype.Repository;
 
