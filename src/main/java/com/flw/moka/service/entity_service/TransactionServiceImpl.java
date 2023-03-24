@@ -1,4 +1,4 @@
-package com.flw.moka.service.entities;
+package com.flw.moka.service.entity_service;
 
 import java.util.Optional;
 
@@ -8,7 +8,8 @@ import com.flw.moka.entity.Transaction;
 import com.flw.moka.entity.helpers.ProxyResponse;
 import com.flw.moka.exception.TransactionNotFoundException;
 import com.flw.moka.repository.TransactionRepository;
-import com.flw.moka.utilities.MethodValidator;
+import com.flw.moka.service.helper_service.ProxyResponseService;
+import com.flw.moka.validation.MethodValidator;
 
 import lombok.AllArgsConstructor;
 

@@ -1,7 +1,6 @@
-package com.flw.moka.service.controllers;
+package com.flw.moka.service.controller_service;
 
 import java.net.URI;
-import java.text.ParseException;
 import java.util.Optional;
 
 import org.springframework.core.env.Environment;
@@ -16,9 +15,9 @@ import com.flw.moka.entity.helpers.ProviderPayload;
 import com.flw.moka.entity.helpers.ProviderResponse;
 import com.flw.moka.entity.helpers.ProviderResponseData;
 import com.flw.moka.entity.helpers.ProxyResponse;
-import com.flw.moka.service.entities.CardParamsService;
-import com.flw.moka.service.entities.ProxyResponseService;
-import com.flw.moka.service.entities.TransactionService;
+import com.flw.moka.service.entity_service.CardParamsService;
+import com.flw.moka.service.entity_service.TransactionService;
+import com.flw.moka.service.helper_service.ProxyResponseService;
 import com.flw.moka.utilities.EntityPreparationUtil;
 import com.flw.moka.utilities.ProviderApiUtil;
 
@@ -26,7 +25,8 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 @Service
-public class VoidService {
+public class CaptureService {
+
 	private Environment environment;
 	CardParamsService cardParamsService;
 	TransactionService transactionService;
@@ -34,24 +34,22 @@ public class VoidService {
 	ProviderApiUtil providerApiUtil;
 
 	public ResponseEntity<ProxyResponse> sendProviderPayload(ProviderPayload providerPayload,
-			ProductRequest productRequest,
-			Transaction transaction)
-			throws ParseException {
+			ProductRequest productRequest) {
 
-		String voidEndpoint = environment.getProperty("provider.endpoints.void");
-		URI endpointURI = URI.create(voidEndpoint);
+		String captureEndpoint = environment.getProperty("provider.endpoints.capture");
+		URI endpointURI = URI.create(captureEndpoint);
 
-		ResponseEntity<ProviderResponse> responseEntity = providerApiUtil.makeProviderApiCall(
-				endpointURI,
+		String transactionReference = productRequest.getTransactionReference();
+
+		Transaction transaction = transactionService.getTransaction(transactionReference, Methods.CAPTURE);
+
+		ResponseEntity<ProviderResponse> providerResponseEntity = providerApiUtil.makeProviderApiCall(endpointURI,
 				providerPayload);
-		Optional<ProviderResponse> providerResponseBody = providerApiUtil.handleNoProviderResponse(responseEntity);
-		Optional<ProviderResponseData> providerResponseData = providerApiUtil
-				.unwrapProviderResponse(providerResponseBody);
+		Optional<ProviderResponse> providerResponse = providerApiUtil.handleNoProviderResponse(providerResponseEntity);
+		Optional<ProviderResponseData> providerResponseData = providerApiUtil.unwrapProviderResponse(providerResponse);
 
-		ProxyResponse proxyResponse = proxyResponseService.createProxyResponse(providerResponseData,
-				providerResponseBody,
-				productRequest, Methods.VOID);
-
+		ProxyResponse proxyResponse = proxyResponseService.createProxyResponse(providerResponseData, providerResponse,
+				productRequest, Methods.CAPTURE);
 		CardParams cardParams = prepareCardParams(proxyResponse, productRequest);
 		cardParamsService.saveCardParams(cardParams);
 
@@ -62,13 +60,13 @@ public class VoidService {
 	}
 
 	private CardParams prepareCardParams(ProxyResponse proxyResponse, ProductRequest productRequest) {
-		EntityPreparationUtil entityPreparationUtil = new EntityPreparationUtil(Methods.VOID);
+		EntityPreparationUtil entityPreparationUtil = new EntityPreparationUtil(Methods.CAPTURE);
 		return entityPreparationUtil.setCardParams(proxyResponse, productRequest);
 	}
 
 	private Transaction updateTransactionStatus(ProductRequest productRequest, Transaction transaction,
 			ProxyResponse proxyResponse) {
-		EntityPreparationUtil entityPreparationUtil = new EntityPreparationUtil(Methods.VOID);
+		EntityPreparationUtil entityPreparationUtil = new EntityPreparationUtil(Methods.CAPTURE);
 		return entityPreparationUtil.updateTransactionStatus(productRequest, transaction, proxyResponse);
 	}
 

@@ -1,4 +1,4 @@
-package com.flw.moka.service.controllers;
+package com.flw.moka.service.controller_service;
 
 import java.net.URI;
 import java.text.ParseException;
@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.flw.moka.entity.CardParams;
+import com.flw.moka.entity.Refunds;
 import com.flw.moka.entity.Transaction;
 import com.flw.moka.entity.helpers.Methods;
 import com.flw.moka.entity.helpers.ProductRequest;
@@ -16,9 +17,9 @@ import com.flw.moka.entity.helpers.ProviderPayload;
 import com.flw.moka.entity.helpers.ProviderResponse;
 import com.flw.moka.entity.helpers.ProviderResponseData;
 import com.flw.moka.entity.helpers.ProxyResponse;
-import com.flw.moka.service.entities.CardParamsService;
-import com.flw.moka.service.entities.ProxyResponseService;
-import com.flw.moka.service.entities.TransactionService;
+import com.flw.moka.service.entity_service.CardParamsService;
+import com.flw.moka.service.entity_service.RefundsService;
+import com.flw.moka.service.helper_service.ProxyResponseService;
 import com.flw.moka.utilities.EntityPreparationUtil;
 import com.flw.moka.utilities.ProviderApiUtil;
 
@@ -29,7 +30,7 @@ import lombok.AllArgsConstructor;
 public class RefundService {
 	private Environment environment;
 	CardParamsService cardParamsService;
-	TransactionService transactionService;
+	RefundsService refundsService;
 	ProxyResponseService proxyResponseService;
 	ProviderApiUtil providerApiUtil;
 
@@ -55,8 +56,8 @@ public class RefundService {
 		CardParams cardParams = prepareCardParams(proxyResponse, productRequest);
 		cardParamsService.saveCardParams(cardParams);
 
-		Transaction updatedTransaction = updateTransactionStatus(productRequest, transaction, proxyResponse);
-		transactionService.saveTransaction(updatedTransaction);
+		Refunds newRefund = createNewRefund(productRequest, proxyResponse);
+		refundsService.saveRefund(newRefund);
 
 		return ResponseEntity.ok(proxyResponse);
 	}
@@ -66,9 +67,8 @@ public class RefundService {
 		return entityPreparationUtil.setCardParams(proxyResponse, productRequest);
 	}
 
-	private Transaction updateTransactionStatus(ProductRequest productRequest, Transaction transaction,
-			ProxyResponse proxyResponse) {
+	private Refunds createNewRefund(ProductRequest productRequest, ProxyResponse proxyResponse) {
 		EntityPreparationUtil entityPreparationUtil = new EntityPreparationUtil(Methods.REFUND);
-		return entityPreparationUtil.updateTransactionStatus(productRequest, transaction, proxyResponse);
+		return entityPreparationUtil.setRefund(productRequest, proxyResponse);
 	}
 }

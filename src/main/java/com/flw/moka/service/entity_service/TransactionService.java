@@ -1,4 +1,4 @@
-package com.flw.moka.service.entities;
+package com.flw.moka.service.entity_service;
 
 import com.flw.moka.entity.Transaction;
 

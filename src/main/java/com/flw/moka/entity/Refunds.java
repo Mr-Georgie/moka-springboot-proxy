@@ -16,8 +16,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "transactions")
-public class Transaction {
+@Table(name = "refunds")
+public class Refunds {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,20 +33,8 @@ public class Transaction {
     @Column(name = "mask", nullable = false)
     private String mask;
 
-    @Column(name = "time_authorized", nullable = true)
-    private String timeAuthorized;
-
-    @Column(name = "time_captured", nullable = true)
-    private String timeCaptured;
-
-    @Column(name = "time_voided", nullable = true)
-    private String timeVoided;
-
     @Column(name = "time_refunded", nullable = true)
     private String timeRefunded;
-
-    @Column(name = "tx_status", nullable = true)
-    private String transactionStatus;
 
     @Column(name = "provider", nullable = true)
     private String provider;

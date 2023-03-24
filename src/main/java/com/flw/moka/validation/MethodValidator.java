@@ -1,4 +1,4 @@
-package com.flw.moka.utilities;
+package com.flw.moka.validation;
 
 import org.springframework.stereotype.Component;
 
@@ -7,7 +7,7 @@ import com.flw.moka.entity.helpers.Methods;
 import com.flw.moka.entity.helpers.ProxyResponse;
 import com.flw.moka.exception.NoMethodNamePassedException;
 import com.flw.moka.exception.TransactionNotCapturedException;
-import com.flw.moka.service.entities.ProxyResponseService;
+import com.flw.moka.service.helper_service.ProxyResponseService;
 
 import lombok.AllArgsConstructor;
 
@@ -27,12 +27,6 @@ public class MethodValidator {
             throw new NoMethodNamePassedException(
                     "Please provide a method in your void/refund service to use this utility");
         }
-
-        // if (method.equalsIgnoreCase(Methods.VOID) ||
-        // method.equalsIgnoreCase(Methods.REFUND)) {
-        // throw new TransactionNotCapturedException("Can't " + method + " a transaction
-        // that is not captured");
-        // }
     }
 
     public Transaction preventDuplicateMethodCall(Transaction transaction, String transactionRef, String method) {
@@ -47,7 +41,7 @@ public class MethodValidator {
         boolean isRefundingTransaction = method.equalsIgnoreCase(Methods.REFUND);
         boolean methodHasBeenDoneBefore = currentStatus.equalsIgnoreCase(method);
 
-        if (transactionAlreadyVoided && isVoidingTransaction) {
+        if (transactionAlreadyVoided && (isVoidingTransaction || isRefundingTransaction)) {
             handleResponse(method, transactionRef, currentStatus);
         }
 
@@ -55,7 +49,7 @@ public class MethodValidator {
             handleResponse(method, transactionRef, currentStatus);
         }
 
-        if (transactionAlreadyRefunded && isRefundingTransaction) {
+        if (transactionAlreadyRefunded && (isVoidingTransaction || isRefundingTransaction)) {
             handleResponse(method, transactionRef, currentStatus);
         }
 

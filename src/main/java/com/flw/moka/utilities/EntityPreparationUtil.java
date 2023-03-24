@@ -1,6 +1,7 @@
 package com.flw.moka.utilities;
 
 import com.flw.moka.entity.CardParams;
+import com.flw.moka.entity.Refunds;
 import com.flw.moka.entity.Transaction;
 import com.flw.moka.entity.helpers.Methods;
 import com.flw.moka.entity.helpers.ProductRequest;
@@ -39,7 +40,6 @@ public class EntityPreparationUtil {
 
         TimeUtil timeUtility = new TimeUtil();
 
-        transaction.setExternalRef(proxyResponse.getExRef());
         transaction.setTransactionRef(productRequest.getTransactionReference());
         transaction.setTransactionStatus(method.toUpperCase());
 
@@ -57,7 +57,32 @@ public class EntityPreparationUtil {
             transaction.setTimeVoided(timeUtility.getDateTime());
         }
 
+        if (proxyResponse.getExRef() != null) {
+            transaction.setExternalRef(proxyResponse.getExRef());
+        }
+
         return transaction;
+    }
+
+    public Refunds setRefund(ProductRequest productRequest,
+            ProxyResponse proxyResponse) {
+
+        Refunds refund = new Refunds();
+        TimeUtil timeUtility = new TimeUtil();
+
+        refund.setExternalRef(proxyResponse.getExRef());
+        refund.setTransactionRef(productRequest.getTransactionReference());
+        refund.setResponseCode("00");
+        refund.setResponseMessage("Transaction refunded successfully");
+        refund.setTimeRefunded(timeUtility.getDateTime());
+        refund.setAmount(productRequest.getAmount());
+        refund.setCountry(productRequest.getCountry());
+        refund.setCurrency(productRequest.getCurrency());
+        refund.setMask(productRequest.getCardNo());
+        refund.setNarration("Card transaction");
+        refund.setProvider("Moka");
+
+        return refund;
     }
 
 }

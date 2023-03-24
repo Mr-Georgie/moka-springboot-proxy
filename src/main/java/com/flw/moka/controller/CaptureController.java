@@ -13,9 +13,9 @@ import com.flw.moka.entity.helpers.PaymentDealerRequest;
 import com.flw.moka.entity.helpers.ProductRequest;
 import com.flw.moka.entity.helpers.ProviderPayload;
 import com.flw.moka.entity.helpers.ProxyResponse;
-import com.flw.moka.service.controllers.CaptureService;
-import com.flw.moka.service.entities.PaymentDealerRequestService;
-import com.flw.moka.service.entities.ProviderPayloadService;
+import com.flw.moka.service.controller_service.CaptureService;
+import com.flw.moka.service.helper_service.PaymentDealerRequestService;
+import com.flw.moka.service.helper_service.ProviderPayloadService;
 
 import lombok.AllArgsConstructor;
 
