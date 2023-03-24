@@ -56,7 +56,7 @@ public class RefundService {
 		CardParams cardParams = prepareCardParams(proxyResponse, productRequest);
 		cardParamsService.saveCardParams(cardParams);
 
-		Refunds newRefund = createNewRefund(productRequest, proxyResponse);
+		Refunds newRefund = createNewRefund(transaction, proxyResponse);
 		refundsService.saveRefund(newRefund);
 
 		return ResponseEntity.ok(proxyResponse);
@@ -67,8 +67,8 @@ public class RefundService {
 		return entityPreparationUtil.setCardParams(proxyResponse, productRequest);
 	}
 
-	private Refunds createNewRefund(ProductRequest productRequest, ProxyResponse proxyResponse) {
+	private Refunds createNewRefund(Transaction transaction, ProxyResponse proxyResponse) {
 		EntityPreparationUtil entityPreparationUtil = new EntityPreparationUtil(Methods.REFUND);
-		return entityPreparationUtil.setRefund(productRequest, proxyResponse);
+		return entityPreparationUtil.setRefund(transaction, proxyResponse);
 	}
 }

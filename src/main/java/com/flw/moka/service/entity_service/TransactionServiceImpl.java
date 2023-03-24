@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import com.flw.moka.entity.Transaction;
 import com.flw.moka.entity.helpers.ProxyResponse;
 import com.flw.moka.exception.TransactionNotFoundException;
-import com.flw.moka.repository.TransactionRepository;
+import com.flw.moka.repository.entity_repos.TransactionRepository;
 import com.flw.moka.service.helper_service.ProxyResponseService;
 import com.flw.moka.validation.MethodValidator;
 

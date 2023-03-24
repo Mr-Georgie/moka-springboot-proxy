@@ -3,7 +3,7 @@ package com.flw.moka.service.entity_service;
 import org.springframework.stereotype.Service;
 
 import com.flw.moka.entity.Refunds;
-import com.flw.moka.repository.RefundsRepository;
+import com.flw.moka.repository.entity_repos.RefundsRepository;
 import com.flw.moka.service.helper_service.ProxyResponseService;
 import com.flw.moka.validation.MethodValidator;
 

@@ -1,4 +1,4 @@
-package com.flw.moka.repository;
+package com.flw.moka.repository.helper_repos;
 
 import java.util.Optional;
 
@@ -30,7 +30,7 @@ public class ProxyResponseRepository {
             String exactProviderMessage = formatProviderFailedResponseResultCode(providerResponse);
 
             proxyResponse.setMessage(exactProviderMessage);
-            proxyResponse.setCode("RR-400");
+            proxyResponse.setCode("RR - " + method.toUpperCase() + " Failed");
             proxyResponse.setTxRef(productRequest.getTransactionReference());
             proxyResponse.setExRef("null");
             proxyResponse.setProvider("MOKA");

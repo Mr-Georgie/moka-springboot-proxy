@@ -33,7 +33,7 @@ public class VoidRefundRouter {
         Transaction transaction = transactionService.getTransaction(productRef, method);
 
         methodValidator.preventVoidOrRefundIfNotCaptured(method, transaction);
-        methodValidator.preventDuplicateMethodCall(transaction, productRef, method);
+        // methodValidator.preventDuplicateMethodCall(transaction, productRef, method);
 
         String transactionTimeCaptured = transaction.getTimeCaptured();
 

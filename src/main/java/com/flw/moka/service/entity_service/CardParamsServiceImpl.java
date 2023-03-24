@@ -8,7 +8,7 @@ import com.flw.moka.entity.CardParams;
 import com.flw.moka.entity.helpers.ProxyResponse;
 import com.flw.moka.exception.TransactionAlreadyCapturedException;
 import com.flw.moka.exception.TransactionNotFoundException;
-import com.flw.moka.repository.CardParamsRepository;
+import com.flw.moka.repository.entity_repos.CardParamsRepository;
 import com.flw.moka.service.helper_service.ProxyResponseService;
 
 import lombok.AllArgsConstructor;

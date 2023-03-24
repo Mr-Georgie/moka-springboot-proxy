@@ -11,8 +11,8 @@ import com.flw.moka.entity.helpers.ProviderResponse;
 import com.flw.moka.entity.helpers.ProviderResponseData;
 import com.flw.moka.entity.helpers.ProxyResponse;
 import com.flw.moka.exception.TransactionMethodAlreadyDoneException;
-import com.flw.moka.repository.CardParamsRepository;
-import com.flw.moka.repository.ProxyResponseRepository;
+import com.flw.moka.repository.entity_repos.CardParamsRepository;
+import com.flw.moka.repository.helper_repos.ProxyResponseRepository;
 import com.flw.moka.utilities.TimeUtil;
 import com.google.gson.Gson;
 

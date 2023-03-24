@@ -62,7 +62,7 @@ public class MethodValidator {
     private Transaction handleResponse(String method, String transactionRef, String currentStatus) {
         ProxyResponse proxyResponse = new ProxyResponse();
 
-        proxyResponse.setMessage("This transaction status is: " + method.toUpperCase());
+        proxyResponse.setMessage("This transaction status is: " + currentStatus.toUpperCase());
         proxyResponse.setCode("RR-400");
         proxyResponse.setProvider("MOKA");
 

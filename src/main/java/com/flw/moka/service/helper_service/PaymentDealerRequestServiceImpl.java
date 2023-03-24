@@ -6,7 +6,7 @@ import com.flw.moka.entity.helpers.Methods;
 import com.flw.moka.entity.helpers.PaymentDealerRequest;
 import com.flw.moka.entity.helpers.ProductRequest;
 import com.flw.moka.exception.NoMethodNamePassedException;
-import com.flw.moka.repository.PaymentDealerRequestRepository;
+import com.flw.moka.repository.helper_repos.PaymentDealerRequestRepository;
 
 import lombok.AllArgsConstructor;
 

@@ -41,44 +41,39 @@ public class EntityPreparationUtil {
         TimeUtil timeUtility = new TimeUtil();
 
         transaction.setTransactionRef(productRequest.getTransactionReference());
-        transaction.setTransactionStatus(method.toUpperCase());
+        transaction.setResponseCode(proxyResponse.getCode());
+        transaction.setResponseMessage(proxyResponse.getMessage());
 
-        if (method.equalsIgnoreCase(Methods.CAPTURE)) {
-            transaction.setResponseCode("00");
-            transaction.setResponseMessage("Successful");
-            transaction.setTimeCaptured(timeUtility.getDateTime());
-        } else if (method.equalsIgnoreCase(Methods.REFUND)) {
-            transaction.setResponseCode("00 - Refunded");
-            transaction.setResponseMessage("Transaction refunded successfully");
-            transaction.setTimeRefunded(timeUtility.getDateTime());
-        } else if (method.equalsIgnoreCase(Methods.VOID)) {
-            transaction.setResponseCode("00 - Voided");
-            transaction.setResponseMessage("Transaction voided successfully");
-            transaction.setTimeVoided(timeUtility.getDateTime());
-        }
-
-        if (proxyResponse.getExRef() != null) {
+        if (proxyResponse.getExRef() != "null") {
             transaction.setExternalRef(proxyResponse.getExRef());
+            transaction.setTransactionStatus(method.toUpperCase());
+
+            if (method.equalsIgnoreCase(Methods.CAPTURE)) {
+                transaction.setTimeCaptured(timeUtility.getDateTime());
+            } else if (method.equalsIgnoreCase(Methods.REFUND)) {
+                transaction.setTimeRefunded(timeUtility.getDateTime());
+            } else if (method.equalsIgnoreCase(Methods.VOID)) {
+                transaction.setTimeVoided(timeUtility.getDateTime());
+            }
         }
 
         return transaction;
     }
 
-    public Refunds setRefund(ProductRequest productRequest,
-            ProxyResponse proxyResponse) {
+    public Refunds setRefund(Transaction transaction, ProxyResponse proxyResponse) {
 
         Refunds refund = new Refunds();
         TimeUtil timeUtility = new TimeUtil();
 
         refund.setExternalRef(proxyResponse.getExRef());
-        refund.setTransactionRef(productRequest.getTransactionReference());
-        refund.setResponseCode("00");
-        refund.setResponseMessage("Transaction refunded successfully");
+        refund.setTransactionRef(transaction.getTransactionRef());
+        refund.setResponseCode(proxyResponse.getCode());
+        refund.setResponseMessage(proxyResponse.getMessage());
         refund.setTimeRefunded(timeUtility.getDateTime());
-        refund.setAmount(productRequest.getAmount());
-        refund.setCountry(productRequest.getCountry());
-        refund.setCurrency(productRequest.getCurrency());
-        refund.setMask(productRequest.getCardNo());
+        refund.setAmount(transaction.getAmount());
+        refund.setCountry(transaction.getCountry());
+        refund.setCurrency(transaction.getCurrency());
+        refund.setMask(transaction.getMask());
         refund.setNarration("Card transaction");
         refund.setProvider("Moka");
 
