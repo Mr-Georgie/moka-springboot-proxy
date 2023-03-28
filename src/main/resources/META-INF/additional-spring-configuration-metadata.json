@@ -43,5 +43,10 @@
     "name": "spring.datasource.Driver",
     "type": "java.lang.String",
     "description": "A description for 'spring.datasource.Driver'"
+  },
+  {
+    "name": "provider.endpoints.status",
+    "type": "java.lang.String",
+    "description": "A description for 'provider.endpoints.status'"
   }
 ]}

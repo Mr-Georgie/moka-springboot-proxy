@@ -5,23 +5,23 @@ import java.text.ParseException;
 import java.util.Optional;
 
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.flw.moka.entity.CardParams;
-import com.flw.moka.entity.Refunds;
-import com.flw.moka.entity.Transaction;
-import com.flw.moka.entity.helpers.Methods;
-import com.flw.moka.entity.helpers.ProductRequest;
-import com.flw.moka.entity.helpers.ProviderPayload;
-import com.flw.moka.entity.helpers.ProviderResponse;
-import com.flw.moka.entity.helpers.ProviderResponseData;
-import com.flw.moka.entity.helpers.ProxyResponse;
-import com.flw.moka.service.entity_service.CardParamsService;
-import com.flw.moka.service.entity_service.RefundsService;
+import com.flw.moka.entity.constants.Methods;
+import com.flw.moka.entity.models.Refunds;
+import com.flw.moka.entity.models.Transaction;
+import com.flw.moka.entity.request.ProductRequest;
+import com.flw.moka.entity.request.ProviderPayload;
+import com.flw.moka.entity.response.ProviderResponse;
+import com.flw.moka.entity.response.ProviderResponseData;
+import com.flw.moka.entity.response.ProxyResponse;
 import com.flw.moka.service.helper_service.ProxyResponseService;
-import com.flw.moka.utilities.EntityPreparationUtil;
-import com.flw.moka.utilities.ProviderApiUtil;
+import com.flw.moka.utilities.helpers.LogsUtil;
+import com.flw.moka.utilities.helpers.ProviderApiUtil;
+import com.flw.moka.utilities.helpers.RefundsUtil;
+import com.flw.moka.validation.MethodValidator;
 
 import lombok.AllArgsConstructor;
 
@@ -29,10 +29,11 @@ import lombok.AllArgsConstructor;
 @Service
 public class RefundService {
 	private Environment environment;
-	CardParamsService cardParamsService;
-	RefundsService refundsService;
+	RefundsUtil refundsUtil;
 	ProxyResponseService proxyResponseService;
 	ProviderApiUtil providerApiUtil;
+	LogsUtil logsUtil;
+	MethodValidator methodValidator;
 
 	public ResponseEntity<ProxyResponse> sendProviderPayload(ProviderPayload providerPayload,
 			ProductRequest productRequest, Transaction transaction)
@@ -53,22 +54,16 @@ public class RefundService {
 				providerResponseBody,
 				productRequest, Methods.REFUND);
 
-		CardParams cardParams = prepareCardParams(proxyResponse, productRequest);
-		cardParamsService.saveCardParams(cardParams);
+		addEntitiesToDatabase(proxyResponse, productRequest, transaction);
 
-		Refunds newRefund = createNewRefund(transaction, proxyResponse);
-		refundsService.saveRefund(newRefund);
-
-		return ResponseEntity.ok(proxyResponse);
+		return ResponseEntity.status(HttpStatus.CREATED).body(proxyResponse);
 	}
 
-	private CardParams prepareCardParams(ProxyResponse proxyResponse, ProductRequest productRequest) {
-		EntityPreparationUtil entityPreparationUtil = new EntityPreparationUtil(Methods.REFUND);
-		return entityPreparationUtil.setCardParams(proxyResponse, productRequest);
-	}
+	private void addEntitiesToDatabase(ProxyResponse proxyResponse, ProductRequest productRequest,
+			Transaction transaction) {
+		logsUtil.setLogs(proxyResponse, productRequest, Methods.REFUND);
 
-	private Refunds createNewRefund(Transaction transaction, ProxyResponse proxyResponse) {
-		EntityPreparationUtil entityPreparationUtil = new EntityPreparationUtil(Methods.REFUND);
-		return entityPreparationUtil.setRefund(transaction, proxyResponse);
+		Refunds refund = refundsUtil.checkIfRefundExistInDB(productRequest, Methods.REFUND);
+		refundsUtil.saveRefundToDataBase(proxyResponse, refund, transaction);
 	}
 }

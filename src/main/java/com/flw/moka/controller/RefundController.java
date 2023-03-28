@@ -10,11 +10,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.flw.moka.controller.custom_router.VoidRefundRouter;
-import com.flw.moka.entity.helpers.Methods;
-import com.flw.moka.entity.helpers.PaymentDealerRequest;
-import com.flw.moka.entity.helpers.ProductRequest;
-import com.flw.moka.entity.helpers.ProviderPayload;
-import com.flw.moka.entity.helpers.ProxyResponse;
+import com.flw.moka.entity.constants.Methods;
+import com.flw.moka.entity.request.PaymentDealerRequest;
+import com.flw.moka.entity.request.ProductRequest;
+import com.flw.moka.entity.request.ProviderPayload;
+import com.flw.moka.entity.response.ProxyResponse;
 import com.flw.moka.service.helper_service.PaymentDealerRequestService;
 import com.flw.moka.service.helper_service.ProviderPayloadService;
 
@@ -38,7 +38,6 @@ public class RefundController {
                 ProviderPayload newProviderPayload = providerPayloadService
                                 .savePaymentDealerAuthAndReq(newPaymentDealerRequest);
 
-                return voidRefundRouterUtil.route(productRequest, newProviderPayload, Methods.REFUND);
-
+                return voidRefundRouterUtil.route(productRequest, newProviderPayload);
         }
 }
