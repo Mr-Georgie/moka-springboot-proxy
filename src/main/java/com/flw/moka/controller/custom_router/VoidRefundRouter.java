@@ -5,14 +5,16 @@ import java.text.ParseException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
-import com.flw.moka.entity.Transaction;
-import com.flw.moka.entity.helpers.ProductRequest;
-import com.flw.moka.entity.helpers.ProviderPayload;
-import com.flw.moka.entity.helpers.ProxyResponse;
+import com.flw.moka.entity.constants.Methods;
+import com.flw.moka.entity.models.Transaction;
+import com.flw.moka.entity.request.ProductRequest;
+import com.flw.moka.entity.request.ProviderPayload;
+import com.flw.moka.entity.response.ProxyResponse;
 import com.flw.moka.service.controller_service.RefundService;
 import com.flw.moka.service.controller_service.VoidService;
-import com.flw.moka.service.entity_service.TransactionService;
-import com.flw.moka.utilities.TimeUtil;
+import com.flw.moka.utilities.helpers.RefundsUtil;
+import com.flw.moka.utilities.helpers.TimeUtil;
+import com.flw.moka.utilities.helpers.TransactionUtil;
 import com.flw.moka.validation.MethodValidator;
 
 import lombok.AllArgsConstructor;
@@ -21,19 +23,26 @@ import lombok.AllArgsConstructor;
 @Component
 public class VoidRefundRouter {
 
-    TransactionService transactionService;
+    TransactionUtil transactionUtil;
+    RefundsUtil refundsUtil;
     VoidService voidService;
     RefundService refundService;
     MethodValidator methodValidator;
 
     public ResponseEntity<ProxyResponse> route(ProductRequest productRequest,
-            ProviderPayload providerPayload, String method) throws ParseException {
-        String productRef = productRequest.getTransactionReference();
+            ProviderPayload providerPayload) throws ParseException {
 
-        Transaction transaction = transactionService.getTransaction(productRef, method);
+        String method;
 
-        methodValidator.preventVoidOrRefundIfNotCaptured(method, transaction);
-        // methodValidator.preventDuplicateMethodCall(transaction, productRef, method);
+        if (productRequest.getAmount() == null) {
+            method = Methods.VOID;
+        } else {
+            method = Methods.REFUND;
+        }
+
+        Transaction transaction = transactionUtil.getTransactionIfExistInDB(productRequest, method);
+        refundsUtil
+                .checkIfRefundExistInDB(productRequest, method);
 
         String transactionTimeCaptured = transaction.getTimeCaptured();
 
@@ -42,14 +51,15 @@ public class VoidRefundRouter {
 
         if (isTransactionUpTo24Hours) {
 
-            // This transaction should be refunded
+            methodValidator.preventVoidOrRefundIfNotCaptured(Methods.REFUND, transaction);
             ResponseEntity<ProxyResponse> responseEntity = refundService.sendProviderPayload(
                     providerPayload,
                     productRequest, transaction);
 
             return responseEntity;
         } else {
-            // This transaction should be voided
+
+            methodValidator.preventVoidOrRefundIfNotCaptured(Methods.VOID, transaction);
 
             ResponseEntity<ProxyResponse> responseEntity = voidService.sendProviderPayload(
                     providerPayload,

@@ -2,11 +2,11 @@ package com.flw.moka.service.helper_service;
 
 import org.springframework.stereotype.Service;
 
-import com.flw.moka.entity.helpers.PaymentDealerAuthentication;
-import com.flw.moka.entity.helpers.PaymentDealerRequest;
-import com.flw.moka.entity.helpers.ProviderPayload;
-import com.flw.moka.repository.helper_repos.PaymentDealerAuthenticationRepository;
-import com.flw.moka.repository.helper_repos.ProviderPayloadRepository;
+import com.flw.moka.entity.request.PaymentDealerAuthentication;
+import com.flw.moka.entity.request.PaymentDealerRequest;
+import com.flw.moka.entity.request.ProviderPayload;
+import com.flw.moka.utilities.request.PaymentDealerAuthenticationUtil;
+import com.flw.moka.utilities.request.ProviderPayloadUtil;
 
 import lombok.AllArgsConstructor;
 
@@ -14,8 +14,8 @@ import lombok.AllArgsConstructor;
 @Service
 public class ProviderPayloadServiceImpl implements ProviderPayloadService {
 
-    ProviderPayloadRepository providerPayloadRepository;
-    PaymentDealerAuthenticationRepository paymentDealerAuthenticationRepository;
+    ProviderPayloadUtil providerPayloadRepository;
+    PaymentDealerAuthenticationUtil paymentDealerAuthenticationRepository;
 
     @Override
     public ProviderPayload savePaymentDealerAuthAndReq(PaymentDealerRequest paymentDealerRequest) {

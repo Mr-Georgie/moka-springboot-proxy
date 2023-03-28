@@ -5,22 +5,22 @@ import java.text.ParseException;
 import java.util.Optional;
 
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.flw.moka.entity.CardParams;
-import com.flw.moka.entity.Transaction;
-import com.flw.moka.entity.helpers.Methods;
-import com.flw.moka.entity.helpers.ProductRequest;
-import com.flw.moka.entity.helpers.ProviderPayload;
-import com.flw.moka.entity.helpers.ProviderResponse;
-import com.flw.moka.entity.helpers.ProviderResponseData;
-import com.flw.moka.entity.helpers.ProxyResponse;
-import com.flw.moka.service.entity_service.CardParamsService;
-import com.flw.moka.service.entity_service.TransactionService;
+import com.flw.moka.entity.constants.Methods;
+import com.flw.moka.entity.models.Transaction;
+import com.flw.moka.entity.request.ProductRequest;
+import com.flw.moka.entity.request.ProviderPayload;
+import com.flw.moka.entity.response.ProviderResponse;
+import com.flw.moka.entity.response.ProviderResponseData;
+import com.flw.moka.entity.response.ProxyResponse;
 import com.flw.moka.service.helper_service.ProxyResponseService;
-import com.flw.moka.utilities.EntityPreparationUtil;
-import com.flw.moka.utilities.ProviderApiUtil;
+import com.flw.moka.utilities.helpers.LogsUtil;
+import com.flw.moka.utilities.helpers.ProviderApiUtil;
+import com.flw.moka.utilities.helpers.TransactionUtil;
+import com.flw.moka.validation.MethodValidator;
 
 import lombok.AllArgsConstructor;
 
@@ -28,15 +28,19 @@ import lombok.AllArgsConstructor;
 @Service
 public class VoidService {
 	private Environment environment;
-	CardParamsService cardParamsService;
-	TransactionService transactionService;
+	TransactionUtil transactionUtil;
 	ProxyResponseService proxyResponseService;
 	ProviderApiUtil providerApiUtil;
+	LogsUtil logsUtil;
+	MethodValidator methodValidator;
 
 	public ResponseEntity<ProxyResponse> sendProviderPayload(ProviderPayload providerPayload,
 			ProductRequest productRequest,
 			Transaction transaction)
 			throws ParseException {
+
+		methodValidator
+				.preventDuplicateMethodCall(transaction, Methods.VOID, productRequest, logsUtil, transactionUtil);
 
 		String voidEndpoint = environment.getProperty("provider.endpoints.void");
 		URI endpointURI = URI.create(voidEndpoint);
@@ -52,24 +56,23 @@ public class VoidService {
 				providerResponseBody,
 				productRequest, Methods.VOID);
 
-		CardParams cardParams = prepareCardParams(proxyResponse, productRequest);
-		cardParamsService.saveCardParams(cardParams);
+		addEntitiesToDatabase(proxyResponse, productRequest, transaction);
 
-		Transaction updatedTransaction = updateTransactionStatus(productRequest, transaction, proxyResponse);
-		transactionService.saveTransaction(updatedTransaction);
-
-		return ResponseEntity.ok(proxyResponse);
+		return ResponseEntity.status(HttpStatus.CREATED).body(proxyResponse);
 	}
 
-	private CardParams prepareCardParams(ProxyResponse proxyResponse, ProductRequest productRequest) {
-		EntityPreparationUtil entityPreparationUtil = new EntityPreparationUtil(Methods.VOID);
-		return entityPreparationUtil.setCardParams(proxyResponse, productRequest);
-	}
+	// private void HasVoidBeenDoneAlready(Transaction transaction, String method,
+	// ProductRequest productRequest) {
+	// methodValidator.preventDuplicateMethodCall(transaction, method,
+	// productRequest);
+	// }
 
-	private Transaction updateTransactionStatus(ProductRequest productRequest, Transaction transaction,
-			ProxyResponse proxyResponse) {
-		EntityPreparationUtil entityPreparationUtil = new EntityPreparationUtil(Methods.VOID);
-		return entityPreparationUtil.updateTransactionStatus(productRequest, transaction, proxyResponse);
+	private void addEntitiesToDatabase(ProxyResponse proxyResponse, ProductRequest productRequest,
+			Transaction transaction) {
+		logsUtil.setLogs(proxyResponse, productRequest, Methods.VOID);
+
+		transactionUtil.saveTransactionToDatabase(productRequest, proxyResponse, transaction, Methods.VOID);
+		return;
 	}
 
 }

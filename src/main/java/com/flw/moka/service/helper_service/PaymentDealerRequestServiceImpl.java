@@ -2,11 +2,11 @@ package com.flw.moka.service.helper_service;
 
 import org.springframework.stereotype.Service;
 
-import com.flw.moka.entity.helpers.Methods;
-import com.flw.moka.entity.helpers.PaymentDealerRequest;
-import com.flw.moka.entity.helpers.ProductRequest;
+import com.flw.moka.entity.constants.Methods;
+import com.flw.moka.entity.request.PaymentDealerRequest;
+import com.flw.moka.entity.request.ProductRequest;
 import com.flw.moka.exception.NoMethodNamePassedException;
-import com.flw.moka.repository.helper_repos.PaymentDealerRequestRepository;
+import com.flw.moka.utilities.request.PaymentDealerRequestUtil;
 
 import lombok.AllArgsConstructor;
 
@@ -14,7 +14,7 @@ import lombok.AllArgsConstructor;
 @Service
 public class PaymentDealerRequestServiceImpl implements PaymentDealerRequestService {
 
-    PaymentDealerRequestRepository paymentDealerRequestRepository;
+    PaymentDealerRequestUtil paymentDealerRequestUtil;
     PaymentDealerRequest requestPayload;
 
     @Override
@@ -28,6 +28,8 @@ public class PaymentDealerRequestServiceImpl implements PaymentDealerRequestServ
             requestPayload = saveVoidPayload(productRequest);
         } else if (method.equalsIgnoreCase(Methods.REFUND)) {
             requestPayload = saveRefundPayload(productRequest);
+        } else if (method.equalsIgnoreCase(Methods.STATUS)) {
+            requestPayload = saveStatusPayload(productRequest);
         } else {
             throw new NoMethodNamePassedException("Please provide method in service when using this service");
         }
@@ -37,14 +39,14 @@ public class PaymentDealerRequestServiceImpl implements PaymentDealerRequestServ
 
     private PaymentDealerRequest saveAuthPayload(ProductRequest productRequest) {
         Long amount = productRequest.getAmount();
-        String cardNumber = productRequest.getCardNo();
+        String cardNumber = productRequest.getCardNumber();
         String currency = productRequest.getCurrency();
         String cvcNumber = productRequest.getCvv();
         String expiryMonth = productRequest.getExpiryMonth();
         String expiryYear = productRequest.getExpiryYear();
         String transactionReference = productRequest.getTransactionReference();
 
-        return paymentDealerRequestRepository.setAuthorizePayload(amount, cardNumber, currency, cvcNumber, expiryMonth,
+        return paymentDealerRequestUtil.setAuthorizePayload(amount, cardNumber, currency, cvcNumber, expiryMonth,
                 expiryYear, transactionReference);
     }
 
@@ -52,20 +54,26 @@ public class PaymentDealerRequestServiceImpl implements PaymentDealerRequestServ
         Long amount = productRequest.getAmount();
         String transactionReference = productRequest.getTransactionReference();
 
-        return paymentDealerRequestRepository.setCapturePayload(amount, transactionReference);
+        return paymentDealerRequestUtil.setCapturePayload(amount, transactionReference);
     }
 
     private PaymentDealerRequest saveVoidPayload(ProductRequest productRequest) {
         int voidRefundReason = 2;
         String transactionReference = productRequest.getTransactionReference();
 
-        return paymentDealerRequestRepository.setVoidPayload(voidRefundReason, transactionReference);
+        return paymentDealerRequestUtil.setVoidPayload(voidRefundReason, transactionReference);
     }
 
     private PaymentDealerRequest saveRefundPayload(ProductRequest productRequest) {
         Long amount = productRequest.getAmount();
         String transactionReference = productRequest.getTransactionReference();
 
-        return paymentDealerRequestRepository.setRefundPayload(amount, transactionReference);
+        return paymentDealerRequestUtil.setRefundPayload(amount, transactionReference);
+    }
+
+    private PaymentDealerRequest saveStatusPayload(ProductRequest productRequest) {
+        String transactionReference = productRequest.getTransactionReference();
+
+        return paymentDealerRequestUtil.setStatusPayload(transactionReference);
     }
 }

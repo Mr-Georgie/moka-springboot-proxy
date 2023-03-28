@@ -1,9 +1,11 @@
 package com.flw.moka.service.entity_service;
 
-import com.flw.moka.entity.Refunds;
+import java.util.Optional;
+
+import com.flw.moka.entity.models.Refunds;
 
 public interface RefundsService {
     Refunds saveRefund(Refunds refund);
 
-    // Refunds getTransaction(String ref, String method);
+    Optional<Refunds> getRefund(String ref);
 }

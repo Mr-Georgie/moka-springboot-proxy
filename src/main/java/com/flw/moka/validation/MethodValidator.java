@@ -2,12 +2,17 @@ package com.flw.moka.validation;
 
 import org.springframework.stereotype.Component;
 
-import com.flw.moka.entity.Transaction;
-import com.flw.moka.entity.helpers.Methods;
-import com.flw.moka.entity.helpers.ProxyResponse;
+import com.flw.moka.entity.constants.Methods;
+import com.flw.moka.entity.models.Transaction;
+import com.flw.moka.entity.request.ProductRequest;
+import com.flw.moka.entity.response.ProxyResponse;
 import com.flw.moka.exception.NoMethodNamePassedException;
+import com.flw.moka.exception.TransactionMethodAlreadyDoneException;
 import com.flw.moka.exception.TransactionNotCapturedException;
+import com.flw.moka.exception.TransactionNotFoundException;
 import com.flw.moka.service.helper_service.ProxyResponseService;
+import com.flw.moka.utilities.helpers.LogsUtil;
+import com.flw.moka.utilities.helpers.TransactionUtil;
 
 import lombok.AllArgsConstructor;
 
@@ -29,45 +34,57 @@ public class MethodValidator {
         }
     }
 
-    public Transaction preventDuplicateMethodCall(Transaction transaction, String transactionRef, String method) {
-        String currentStatus = transaction.getTransactionStatus();
+    public void preventDuplicateMethodCall(Transaction transaction, String method, ProductRequest productRequest,
+            LogsUtil logsUtil, TransactionUtil transactionUtil) {
 
-        boolean transactionAlreadyVoided = transaction.getTimeVoided() != null;
-        boolean transactionAlreadyCaptured = transaction.getTimeCaptured() != null;
-        boolean transactionAlreadyRefunded = transaction.getTimeRefunded() != null;
+        if (!method.equalsIgnoreCase(Methods.AUTHORIZE)) {
 
-        boolean isCapturingTransaction = method.equalsIgnoreCase(Methods.CAPTURE);
-        boolean isVoidingTransaction = method.equalsIgnoreCase(Methods.VOID);
-        boolean isRefundingTransaction = method.equalsIgnoreCase(Methods.REFUND);
-        boolean methodHasBeenDoneBefore = currentStatus.equalsIgnoreCase(method);
+            if (transaction.getTransactionStatus() == null) {
+                throw new TransactionNotFoundException("This transaction does not exist");
+            }
 
-        if (transactionAlreadyVoided && (isVoidingTransaction || isRefundingTransaction)) {
-            handleResponse(method, transactionRef, currentStatus);
+            String currentStatus = transaction.getTransactionStatus();
+
+            boolean transactionAlreadyVoided = transaction.getTimeVoided() != null;
+            boolean transactionAlreadyCaptured = transaction.getTimeCaptured() != null;
+            boolean transactionAlreadyRefunded = transaction.getTimeRefunded() != null;
+
+            boolean isCapturingTransaction = method.equalsIgnoreCase(Methods.CAPTURE);
+            boolean isVoidingTransaction = method.equalsIgnoreCase(Methods.VOID);
+            boolean isRefundingTransaction = method.equalsIgnoreCase(Methods.REFUND);
+            boolean methodHasBeenDoneBefore = currentStatus.equalsIgnoreCase(method);
+
+            if (transactionAlreadyVoided && (isVoidingTransaction || isRefundingTransaction)) {
+                handleResponse(method, transaction, currentStatus, productRequest, logsUtil, transactionUtil);
+            }
+
+            if (transactionAlreadyCaptured && isCapturingTransaction) {
+                handleResponse(method, transaction, currentStatus, productRequest, logsUtil, transactionUtil);
+            }
+
+            if (transactionAlreadyRefunded && (isVoidingTransaction || isRefundingTransaction)) {
+                handleResponse(method, transaction, currentStatus, productRequest, logsUtil, transactionUtil);
+            }
+
+            if (methodHasBeenDoneBefore) {
+                handleResponse(method, transaction, currentStatus, productRequest, logsUtil, transactionUtil);
+            }
         }
-
-        if (transactionAlreadyCaptured && isCapturingTransaction) {
-            handleResponse(method, transactionRef, currentStatus);
-        }
-
-        if (transactionAlreadyRefunded && (isVoidingTransaction || isRefundingTransaction)) {
-            handleResponse(method, transactionRef, currentStatus);
-        }
-
-        if (methodHasBeenDoneBefore) {
-            handleResponse(method, transactionRef, currentStatus);
-        }
-        return transaction;
+        return;
     }
 
-    private Transaction handleResponse(String method, String transactionRef, String currentStatus) {
+    private void handleResponse(String method, Transaction transaction, String currentStatus,
+            ProductRequest productRequest, LogsUtil logsUtil, TransactionUtil transactionUtil) {
         ProxyResponse proxyResponse = new ProxyResponse();
 
-        proxyResponse.setMessage("This transaction status is: " + currentStatus.toUpperCase());
-        proxyResponse.setCode("RR-400");
+        proxyResponse.setMessage(method.toUpperCase() + " has already been done on this transaction");
+        proxyResponse.setCode(transaction.getResponseCode());
         proxyResponse.setProvider("MOKA");
 
-        proxyResponseService.saveFailedResponseToDB(proxyResponse, transactionRef, method);
+        logsUtil.setLogs(proxyResponse, productRequest, method);
 
-        return proxyResponseService.sendMethodAlreadyDoneResponse(currentStatus, transactionRef, Transaction.class);
+        transactionUtil.saveTransactionToDatabase(productRequest, proxyResponse, transaction, method);
+
+        throw new TransactionMethodAlreadyDoneException(proxyResponse.getMessage());
     }
 }
