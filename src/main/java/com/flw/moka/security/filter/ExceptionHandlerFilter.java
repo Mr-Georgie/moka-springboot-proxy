@@ -25,11 +25,11 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
             response.getWriter().flush();
         } catch (JWTVerificationException e) {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            response.getWriter().write("JWT NOT VALID");
+            response.getWriter().write("Access token not valid. Please authenticate to use resource");
             response.getWriter().flush();
         } catch (RuntimeException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write("BAD REQUEST");
+            response.getWriter().write("Bad request. Please check your request parameters and try again");
             response.getWriter().flush();
         }
     }
