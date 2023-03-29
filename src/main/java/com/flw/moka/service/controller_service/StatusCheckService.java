@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.flw.moka.entity.constants.Methods;
+import com.flw.moka.entity.models.Logs;
 import com.flw.moka.entity.models.Refunds;
 import com.flw.moka.entity.models.Transaction;
 import com.flw.moka.entity.request.ProductRequest;
@@ -17,10 +18,13 @@ import com.flw.moka.entity.response.ProviderResponse;
 import com.flw.moka.entity.response.ProviderResponseData;
 import com.flw.moka.entity.response.ProxyResponse;
 import com.flw.moka.entity.response.StatusCheckResponse;
+import com.flw.moka.service.entity_service.LogsService;
 import com.flw.moka.service.entity_service.RefundsService;
 import com.flw.moka.service.entity_service.TransactionService;
 import com.flw.moka.service.helper_service.ProxyResponseService;
 import com.flw.moka.utilities.helpers.ProviderApiUtil;
+import com.flw.moka.utilities.helpers.TimeUtil;
+import com.google.gson.Gson;
 
 import lombok.AllArgsConstructor;
 
@@ -33,6 +37,7 @@ public class StatusCheckService {
     private Environment environment;
     ProviderApiUtil providerApiUtil;
     ProxyResponseService proxyResponseService;
+    LogsService logsService;
 
     public StatusCheckResponse check(String reference, ProviderPayload providerPayload,
             ProductRequest productRequest) {
@@ -44,13 +49,15 @@ public class StatusCheckService {
 
             StatusCheckResponse providerStatusCheckResponse = getStatusFromProvider(providerPayload,
                     productRequest);
+
+            logStatusCheck(providerStatusCheckResponse);
             return providerStatusCheckResponse;
 
         } else if ((findRefund.isPresent() && findRefund.get().getResponseCode().equalsIgnoreCase("03"))) {
             Refunds refund = findRefund.get();
             String status = "REFUNDED";
-            statusCheckResponse.setRefund(refund);
-            statusCheckResponse.setStatus(status);
+            statusCheckResponse.setRefundDetail(refund);
+            statusCheckResponse.setStatusMessage(status);
 
         } else {
             Optional<Transaction> findTransaction = transactionService.getTransaction(reference);
@@ -58,23 +65,26 @@ public class StatusCheckService {
             if (findTransaction.isPresent()) {
                 Transaction transaction = findTransaction.get();
                 String status = transaction.getTransactionStatus();
-                statusCheckResponse.setTransaction(transaction);
-                statusCheckResponse.setStatus(
+                statusCheckResponse.setTransactionDetail(transaction);
+                statusCheckResponse.setStatusMessage(
                         status.equalsIgnoreCase("Void") ? "VOIDED" : status + "D");
             } else {
                 StatusCheckResponse providerStatusCheckResponse = getStatusFromProvider(providerPayload,
                         productRequest);
+                logStatusCheck(providerStatusCheckResponse);
                 return providerStatusCheckResponse;
             }
         }
 
+        logStatusCheck(statusCheckResponse);
         return statusCheckResponse;
     }
 
     public StatusCheckResponse getStatusFromProvider(ProviderPayload providerPayload, ProductRequest productRequest) {
         StatusCheckResponse statusCheckResponse = new StatusCheckResponse();
-        String authEndpoint = environment.getProperty("provider.endpoints.status");
-        URI endpointURI = URI.create(authEndpoint);
+        String statusEndpoint = environment.getProperty("provider.endpoints.status");
+
+        URI endpointURI = URI.create(statusEndpoint);
 
         ResponseEntity<ProviderResponse> responseEntity = providerApiUtil.makeProviderApiCall(
                 endpointURI, providerPayload);
@@ -104,26 +114,43 @@ public class StatusCheckService {
         Boolean refundSuccessful = (paymentStatus == 4 && transactionStatus == 1);
 
         if (awaitingPaymentConfirmation) {
-            statusCheckResponse.setStatus("Payment Authorization Pending");
+            statusCheckResponse.setStatusMessage("Payment Authorization Pending");
         } else if (preProvisionSuccessful) {
-            statusCheckResponse.setStatus("Authorization Successful");
+            statusCheckResponse.setStatusMessage("Authorization Successful");
         } else if (preProvisionFailed) {
-            statusCheckResponse.setStatus("Authorization Failed");
+            statusCheckResponse.setStatusMessage("Authorization Failed");
         } else if (paymentSuccessful) {
-            statusCheckResponse.setStatus("Payment Successful");
+            statusCheckResponse.setStatusMessage("Payment Successful");
         } else if (paymentFailed) {
-            statusCheckResponse.setStatus("Payment Failed");
+            statusCheckResponse.setStatusMessage("Payment Failed");
         } else if (cancellationSuccessful) {
-            statusCheckResponse.setStatus("Void Successful");
+            statusCheckResponse.setStatusMessage("Void Successful");
         } else if (refundSuccessful) {
-            statusCheckResponse.setStatus("Refund Successful");
+            statusCheckResponse.setStatusMessage("Refund Successful");
         } else {
-            statusCheckResponse.setStatus("Invalid Payment Status");
+            statusCheckResponse.setStatusMessage("Invalid Payment Status");
         }
 
-        statusCheckResponse.setInfo(paymentDetail);
+        statusCheckResponse.setProviderResponse(paymentDetail);
 
         return statusCheckResponse;
+    }
+
+    private void logStatusCheck(StatusCheckResponse statusCheckResponse) {
+        TimeUtil timeUtility = new TimeUtil();
+        Logs log = new Logs();
+        Gson gson = new Gson();
+
+        String jsonstatusCheckResponse = gson.toJson(statusCheckResponse);
+
+        log.setExternalReference("N/A");
+        log.setBody("Status check");
+        log.setMethod("status");
+        log.setResponse(jsonstatusCheckResponse);
+        log.setTransactionReference("N/A");
+        log.setTimeIn(timeUtility.getDateTime());
+
+        logsService.saveLogs(log);
     }
 
 }

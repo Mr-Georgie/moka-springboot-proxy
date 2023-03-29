@@ -1,7 +1,5 @@
 package com.flw.moka.security;
 
-import static org.springframework.security.config.Customizer.withDefaults;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -28,16 +26,18 @@ public class SecurityConfig {
         http
                 .cors().disable()
                 .csrf().disable()
-                .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
-                        .anyRequest().authenticated())
+                .authorizeHttpRequests(requests -> requests
+                        .requestMatchers(
+                                "/error")
+                        .permitAll().anyRequest().authenticated())
                 .addFilterBefore(new ExceptionHandlerFilter(), AuthenticationFilter.class)
-                .addFilterBefore(authenticationFilter, AuthenticationFilter.class)
+                .addFilter(authenticationFilter)
                 .addFilterAfter(new JWTAuthorizationFilter(), AuthenticationFilter.class)
-                .httpBasic(withDefaults())
-                .sessionManagement(
-                        sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                .sessionManagement(management -> management
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();
+
     }
 
 }

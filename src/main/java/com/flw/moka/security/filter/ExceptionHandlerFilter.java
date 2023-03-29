@@ -29,7 +29,7 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
             response.getWriter().flush();
         } catch (RuntimeException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write("Bad request. Please check your request parameters and try again");
+            response.getWriter().write("Bad request. Please check your request parameters and try again.");
             response.getWriter().flush();
         }
     }
