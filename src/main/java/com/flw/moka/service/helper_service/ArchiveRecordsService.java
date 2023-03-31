@@ -3,6 +3,7 @@ package com.flw.moka.service.helper_service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.flw.moka.entity.models.Logs;
@@ -10,7 +11,6 @@ import com.flw.moka.entity.models.LogsArchive;
 import com.flw.moka.service.entity_service.LogsArchiveService;
 import com.flw.moka.service.entity_service.LogsService;
 
-import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -20,7 +20,8 @@ public class ArchiveRecordsService {
     private LogsService logsService;
     private LogsArchiveService logsArchiveService;
 
-    @PostConstruct
+    // @PostConstruct
+    @Scheduled(fixedRate = 10000) // run every 10 seconds
     public void init() {
         archiveLogs();
     }
@@ -29,7 +30,7 @@ public class ArchiveRecordsService {
         List<Logs> logsList = logsService.findAll();
         List<LogsArchive> newLogsArchives = new ArrayList<>();
 
-        if (logsList.size() > 35) {
+        if (logsList.size() > 10) {
             for (Logs log : logsList) {
                 LogsArchive archive = new LogsArchive();
                 archive.setTransactionReference(log.getTransactionReference());
@@ -49,7 +50,7 @@ public class ArchiveRecordsService {
             System.out.println("==================================");
         } else {
             System.out.println("===========================================");
-            System.out.println("Logs are not more than to 35 records yet");
+            System.out.println("Logs are not more than to 10 records yet");
             System.out.println("===========================================");
         }
     }

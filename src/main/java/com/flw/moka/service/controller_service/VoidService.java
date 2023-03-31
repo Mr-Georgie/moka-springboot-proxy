@@ -40,7 +40,8 @@ public class VoidService {
 			throws ParseException {
 
 		methodValidator
-				.preventDuplicateMethodCall(transaction, Methods.VOID, productRequest, logsUtil, transactionUtil);
+				.preventDuplicateMethodCall(transaction, Methods.VOID, productRequest, logsUtil, transactionUtil, null,
+						null);
 
 		String voidEndpoint = environment.getProperty("provider.endpoints.void");
 		URI endpointURI = URI.create(voidEndpoint);

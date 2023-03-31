@@ -116,9 +116,9 @@ public class StatusCheckService {
         if (awaitingPaymentConfirmation) {
             statusCheckResponse.setStatusMessage("Payment Authorization Pending");
         } else if (preProvisionSuccessful) {
-            statusCheckResponse.setStatusMessage("Authorization Successful");
+            statusCheckResponse.setStatusMessage("Authorize Successful");
         } else if (preProvisionFailed) {
-            statusCheckResponse.setStatusMessage("Authorization Failed");
+            statusCheckResponse.setStatusMessage("Authorize Failed");
         } else if (paymentSuccessful) {
             statusCheckResponse.setStatusMessage("Payment Successful");
         } else if (paymentFailed) {

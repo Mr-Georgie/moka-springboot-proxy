@@ -21,7 +21,6 @@ import lombok.Setter;
         @Index(name = "transactionref_index", columnList = "transaction_reference"),
         @Index(name = "timecaptured_index", columnList = "time_captured"),
         @Index(name = "timevoided_index", columnList = "time_voided"),
-        @Index(name = "timerefunded_index", columnList = "time_refunded"),
         @Index(name = "timein_index", columnList = "time_in"),
         @Index(name = "mask_index", columnList = "mask")
 })
@@ -49,9 +48,6 @@ public class Transaction {
 
     @Column(name = "time_voided", nullable = true)
     private String timeVoided;
-
-    @Column(name = "time_refunded", nullable = true)
-    private String timeRefunded;
 
     @Column(name = "transaction_status", nullable = true)
     private String transactionStatus;

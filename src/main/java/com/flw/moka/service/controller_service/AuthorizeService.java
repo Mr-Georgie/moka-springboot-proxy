@@ -29,46 +29,49 @@ import lombok.AllArgsConstructor;
 @Service
 public class AuthorizeService {
 
-    private Environment environment;
-    LogsService logsService;
-    TransactionService transactionService;
-    ProxyResponseService proxyResponseService;
-    ProviderApiUtil providerApiUtil;
-    MaskCardNumberInProductRequestUtil maskCardNumberInProductRequestUtility;
-    LogsUtil logsUtil;
-    TransactionUtil transactionUtil;
+        private Environment environment;
+        LogsService logsService;
+        TransactionService transactionService;
+        ProxyResponseService proxyResponseService;
+        ProviderApiUtil providerApiUtil;
+        MaskCardNumberInProductRequestUtil maskCardNumberInProductRequestUtility;
+        LogsUtil logsUtil;
+        TransactionUtil transactionUtil;
 
-    public ResponseEntity<ProxyResponse> sendProviderPayload(ProviderPayload providerPayload,
-            ProductRequest productRequest) {
+        public ResponseEntity<ProxyResponse> sendProviderPayload(ProviderPayload providerPayload,
+                        ProductRequest productRequest) {
 
-        String authEndpoint = environment.getProperty("provider.endpoints.authorize");
-        URI endpointURI = URI.create(authEndpoint);
+                String authEndpoint = environment.getProperty("provider.endpoints.authorize");
+                URI endpointURI = URI.create(authEndpoint);
 
-        ResponseEntity<ProviderResponse> responseEntity = providerApiUtil.makeProviderApiCall(
-                endpointURI, providerPayload);
-        Optional<ProviderResponse> providerResponseBody = providerApiUtil.handleNoProviderResponse(responseEntity);
-        Optional<ProviderResponseData> providerResponseData = providerApiUtil
-                .unwrapProviderResponse(providerResponseBody);
+                ResponseEntity<ProviderResponse> responseEntity = providerApiUtil.makeProviderApiCall(
+                                endpointURI, providerPayload);
+                Optional<ProviderResponse> providerResponseBody = providerApiUtil
+                                .handleNoProviderResponse(responseEntity);
+                Optional<ProviderResponseData> providerResponseData = providerApiUtil
+                                .unwrapProviderResponse(providerResponseBody);
 
-        ProductRequest productRequestWithMaskedCardNumber = maskCardNumberInProductRequestUtility.mask(productRequest);
+                ProductRequest productRequestWithMaskedCardNumber = maskCardNumberInProductRequestUtility
+                                .mask(productRequest);
 
-        ProxyResponse proxyResponse = proxyResponseService.createProxyResponse(providerResponseData,
-                providerResponseBody,
-                productRequestWithMaskedCardNumber, Methods.AUTHORIZE);
+                ProxyResponse proxyResponse = proxyResponseService.createProxyResponse(providerResponseData,
+                                providerResponseBody,
+                                productRequestWithMaskedCardNumber, Methods.AUTHORIZE);
 
-        productRequest.setExternalReference(proxyResponse.getExternalReference());
+                productRequest.setExternalReference(proxyResponse.getExternalReference());
 
-        addEntitiesToDatabase(proxyResponse, productRequestWithMaskedCardNumber);
+                addEntitiesToDatabase(proxyResponse, productRequestWithMaskedCardNumber);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(proxyResponse);
-    }
+                return ResponseEntity.status(HttpStatus.CREATED).body(proxyResponse);
+        }
 
-    private void addEntitiesToDatabase(ProxyResponse proxyResponse, ProductRequest productRequest) {
-        logsUtil.setLogs(proxyResponse, productRequest, Methods.AUTHORIZE);
+        private void addEntitiesToDatabase(ProxyResponse proxyResponse, ProductRequest productRequest) {
+                logsUtil.setLogs(proxyResponse, productRequest, Methods.AUTHORIZE);
 
-        Transaction transaction = new Transaction();
-        transactionUtil.saveTransactionToDatabase(productRequest, proxyResponse, transaction, Methods.AUTHORIZE);
-        return;
-    }
+                Transaction transaction = new Transaction();
+                transactionUtil.saveTransactionToDatabase(productRequest, proxyResponse, transaction,
+                                Methods.AUTHORIZE);
+                return;
+        }
 
 }
