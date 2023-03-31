@@ -57,7 +57,7 @@ public class CaptureService {
 
 		addEntitiesToDatabase(proxyResponse, productRequest, transaction);
 
-		return ResponseEntity.status(HttpStatus.CREATED).body(proxyResponse);
+		return ResponseEntity.status(HttpStatus.OK).body(proxyResponse);
 	}
 
 	// private void HasCaptureBeenDoneAlready(Transaction transaction, String
