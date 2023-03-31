@@ -39,6 +39,12 @@ public class RefundService {
 			ProductRequest productRequest, Transaction transaction)
 			throws ParseException {
 
+		Refunds refund = refundsUtil.checkIfRefundExistInDB(productRequest, Methods.REFUND);
+
+		methodValidator
+				.preventDuplicateMethodCall(transaction, Methods.REFUND, productRequest, logsUtil, null, refund,
+						refundsUtil);
+
 		String refundEndpoint = environment.getProperty("provider.endpoints.refund");
 		URI endpointURI = URI.create(refundEndpoint);
 
@@ -54,16 +60,15 @@ public class RefundService {
 				providerResponseBody,
 				productRequest, Methods.REFUND);
 
-		addEntitiesToDatabase(proxyResponse, productRequest, transaction);
+		addEntitiesToDatabase(proxyResponse, productRequest, transaction, refund);
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(proxyResponse);
 	}
 
 	private void addEntitiesToDatabase(ProxyResponse proxyResponse, ProductRequest productRequest,
-			Transaction transaction) {
+			Transaction transaction, Refunds refund) {
 		logsUtil.setLogs(proxyResponse, productRequest, Methods.REFUND);
 
-		Refunds refund = refundsUtil.checkIfRefundExistInDB(productRequest, Methods.REFUND);
 		refundsUtil.saveRefundToDataBase(proxyResponse, refund, transaction);
 	}
 }

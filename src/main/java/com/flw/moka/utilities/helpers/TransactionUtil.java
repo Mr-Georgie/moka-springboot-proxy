@@ -63,15 +63,6 @@ public class TransactionUtil {
                     transaction.setTimeVoided(timeUtility.getDateTime());
                 }
                 break;
-            case Methods.REFUND:
-                transaction.setResponseCode(proxyResponse.getCode());
-                transaction.setResponseMessage(proxyResponse.getMessage());
-                if (proxyResponse.getExternalReference() != null) {
-                    transaction.setExternalReference(proxyResponse.getExternalReference());
-                    transaction.setTransactionStatus(method.toUpperCase());
-                    transaction.setTimeRefunded(timeUtility.getDateTime());
-                }
-                break;
             default:
                 System.out.println("method not recognized.");
                 break;
