@@ -62,7 +62,7 @@ public class RefundService {
 
 		addEntitiesToDatabase(proxyResponse, productRequest, transaction, refund);
 
-		return ResponseEntity.status(HttpStatus.CREATED).body(proxyResponse);
+		return ResponseEntity.status(HttpStatus.OK).body(proxyResponse);
 	}
 
 	private void addEntitiesToDatabase(ProxyResponse proxyResponse, ProductRequest productRequest,
