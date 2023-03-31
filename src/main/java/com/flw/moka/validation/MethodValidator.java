@@ -52,8 +52,9 @@ public class MethodValidator {
             boolean transactionAlreadyRefunded = false;
 
             if (findRefund.isPresent()
-                    && findRefund.get().getResponseCode().equalsIgnoreCase("03")) {
-                transactionAlreadyRefunded = true;
+                    && findRefund.get().getResponseCode() != null) {
+                if (findRefund.get().getResponseCode().equalsIgnoreCase("03"))
+                    transactionAlreadyRefunded = true;
             }
 
             String currentStatus = transaction.getTransactionStatus();
