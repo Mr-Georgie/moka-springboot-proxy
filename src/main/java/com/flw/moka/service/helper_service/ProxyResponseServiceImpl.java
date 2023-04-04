@@ -17,13 +17,13 @@ import lombok.AllArgsConstructor;
 @Service
 public class ProxyResponseServiceImpl implements ProxyResponseService {
 
-    ProxyResponseUtil proxyResponseRepository;
+    ProxyResponseUtil proxyResponseUtil;
     LogsRepository logsRepository;
 
     @Override
     public ProxyResponse createProxyResponse(Optional<ProviderResponseData> dataEntity,
             Optional<ProviderResponse> bodyEntity, ProductRequest productRequest, String method) {
-        return proxyResponseRepository.setProxyResponse(dataEntity, bodyEntity, productRequest, method);
+        return proxyResponseUtil.setProxyResponse(dataEntity, bodyEntity, productRequest, method);
     }
 
 }

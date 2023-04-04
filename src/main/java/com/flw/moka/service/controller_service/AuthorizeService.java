@@ -58,7 +58,7 @@ public class AuthorizeService {
                                 providerResponseBody,
                                 productRequestWithMaskedCardNumber, Methods.AUTHORIZE);
 
-                productRequest.setExternalReference(proxyResponse.getExternalReference());
+                productRequest.setExternalReference(proxyResponse.getMeta().getExternalReference());
 
                 addEntitiesToDatabase(proxyResponse, productRequestWithMaskedCardNumber);
 

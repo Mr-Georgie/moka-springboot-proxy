@@ -21,29 +21,29 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/moka")
 public class CaptureController {
 
-    ProviderPayloadService providerPayloadService;
-    PaymentDealerRequestService paymentDealerRequestService;
-    CaptureService captureService;
+        ProviderPayloadService providerPayloadService;
+        PaymentDealerRequestService paymentDealerRequestService;
+        CaptureService captureService;
 
-    @PostMapping(path = "/capture", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<ProxyResponse> saveCardParams(@RequestBody ProductRequest productRequest)
-            throws URISyntaxException {
+        @PostMapping(path = "/capture", consumes = "application/json", produces = "application/json")
+        public ResponseEntity<ProxyResponse> saveCardParams(@RequestBody ProductRequest productRequest)
+                        throws URISyntaxException {
 
-        PaymentDealerRequest newPaymentDealerRequest = paymentDealerRequestService.createRequestPayload(
-                productRequest,
-                Methods.CAPTURE);
-        ProviderPayload newProviderPayload = providerPayloadService
-                .savePaymentDealerAuthAndReq(newPaymentDealerRequest);
+                PaymentDealerRequest newPaymentDealerRequest = paymentDealerRequestService.createRequestPayload(
+                                productRequest,
+                                Methods.CAPTURE);
+                ProviderPayload newProviderPayload = providerPayloadService
+                                .savePaymentDealerAuthAndReq(newPaymentDealerRequest);
 
-        ResponseEntity<ProxyResponse> responseEntity = captureService.sendProviderPayload(
-                newProviderPayload,
-                productRequest);
+                ResponseEntity<ProxyResponse> responseEntity = captureService.sendProviderPayload(
+                                newProviderPayload,
+                                productRequest);
 
-        return responseEntity;
+                return responseEntity;
 
-    }
+        }
 
 }

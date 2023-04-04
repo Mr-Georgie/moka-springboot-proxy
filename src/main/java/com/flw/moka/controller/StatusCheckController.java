@@ -20,7 +20,7 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/moka")
 public class StatusCheckController {
 
         ProviderPayloadService providerPayloadService;

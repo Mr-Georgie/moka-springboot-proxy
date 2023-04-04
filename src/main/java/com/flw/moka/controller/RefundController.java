@@ -22,7 +22,7 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/moka")
 public class RefundController {
         ProviderPayloadService providerPayloadService;
         PaymentDealerRequestService paymentDealerRequestService;

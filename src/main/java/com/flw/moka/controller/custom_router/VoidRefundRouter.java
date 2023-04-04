@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import com.flw.moka.entity.constants.Methods;
+import com.flw.moka.entity.models.Refunds;
 import com.flw.moka.entity.models.Transaction;
 import com.flw.moka.entity.request.ProductRequest;
 import com.flw.moka.entity.request.ProviderPayload;
@@ -41,8 +42,6 @@ public class VoidRefundRouter {
         }
 
         Transaction transaction = transactionUtil.getTransactionIfExistInDB(productRequest, method);
-        refundsUtil
-                .checkIfRefundExistInDB(productRequest, method);
 
         String transactionTimeCaptured = transaction.getTimeCaptured();
 
@@ -51,10 +50,13 @@ public class VoidRefundRouter {
 
         if (isTransactionUpTo24Hours) {
 
+            Refunds refund = refundsUtil
+                    .checkIfRefundExistInDB(productRequest, method);
+
             methodValidator.preventVoidOrRefundIfNotCaptured(Methods.REFUND, transaction);
             ResponseEntity<ProxyResponse> responseEntity = refundService.sendProviderPayload(
                     providerPayload,
-                    productRequest, transaction);
+                    productRequest, transaction, refund);
 
             return responseEntity;
         } else {

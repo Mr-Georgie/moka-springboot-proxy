@@ -36,10 +36,8 @@ public class RefundService {
 	MethodValidator methodValidator;
 
 	public ResponseEntity<ProxyResponse> sendProviderPayload(ProviderPayload providerPayload,
-			ProductRequest productRequest, Transaction transaction)
+			ProductRequest productRequest, Transaction transaction, Refunds refund)
 			throws ParseException {
-
-		Refunds refund = refundsUtil.checkIfRefundExistInDB(productRequest, Methods.REFUND);
 
 		methodValidator
 				.preventDuplicateMethodCall(transaction, Methods.REFUND, productRequest, logsUtil, null, refund,

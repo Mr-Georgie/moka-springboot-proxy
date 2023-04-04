@@ -20,8 +20,7 @@ public class ArchiveRecordsService {
     private LogsService logsService;
     private LogsArchiveService logsArchiveService;
 
-    // @PostConstruct
-    @Scheduled(fixedRate = 10000) // run every 10 seconds
+    @Scheduled(cron = "0 0 0 31 12 ?") // runs every 31st December at midnight (00:00:00)
     public void init() {
         archiveLogs();
     }
@@ -30,29 +29,23 @@ public class ArchiveRecordsService {
         List<Logs> logsList = logsService.findAll();
         List<LogsArchive> newLogsArchives = new ArrayList<>();
 
-        if (logsList.size() > 10) {
-            for (Logs log : logsList) {
-                LogsArchive archive = new LogsArchive();
-                archive.setTransactionReference(log.getTransactionReference());
-                archive.setExternalReference(log.getExternalReference());
-                archive.setMethod(log.getMethod());
-                archive.setBody(log.getBody());
-                archive.setResponse(log.getResponse());
-                archive.setTimeIn(log.getTimeIn());
-                newLogsArchives.add(archive);
-            }
-
-            logsArchiveService.saveAll(newLogsArchives);
-            logsService.deleteAll();
-
-            System.out.println("==================================");
-            System.out.println("Logs archived successfully");
-            System.out.println("==================================");
-        } else {
-            System.out.println("===========================================");
-            System.out.println("Logs are not more than to 10 records yet");
-            System.out.println("===========================================");
+        for (Logs log : logsList) {
+            LogsArchive archive = new LogsArchive();
+            archive.setTransactionReference(log.getTransactionReference());
+            archive.setExternalReference(log.getExternalReference());
+            archive.setMethod(log.getMethod());
+            archive.setBody(log.getBody());
+            archive.setResponse(log.getResponse());
+            archive.setTimeIn(log.getTimeIn());
+            newLogsArchives.add(archive);
         }
+
+        logsArchiveService.saveAll(newLogsArchives);
+        logsService.deleteAll();
+
+        System.out.println("==================================");
+        System.out.println("Logs archived successfully");
+        System.out.println("==================================");
     }
 
     public void unArchiveLogs() {

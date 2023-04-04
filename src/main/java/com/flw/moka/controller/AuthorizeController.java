@@ -16,18 +16,20 @@ import com.flw.moka.exception.InvalidProductRequestException;
 import com.flw.moka.service.controller_service.AuthorizeService;
 import com.flw.moka.service.helper_service.PaymentDealerRequestService;
 import com.flw.moka.service.helper_service.ProviderPayloadService;
+import com.flw.moka.utilities.helpers.GenerateReferenceUtil;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/moka")
 public class AuthorizeController {
 
         ProviderPayloadService providerPayloadService;
         PaymentDealerRequestService paymentDealerRequestService;
         AuthorizeService authService;
+        GenerateReferenceUtil generateReferenceUtil;
 
         @PostMapping(path = "/authorize", consumes = "application/json", produces = "application/json")
         public ResponseEntity<ProxyResponse> saveCardParams(@Valid @RequestBody ProductRequest productRequest,
@@ -36,6 +38,8 @@ public class AuthorizeController {
                 if (bindingResult.hasErrors()) {
                         throw new InvalidProductRequestException(bindingResult);
                 }
+
+                productRequest.setTransactionReference(generateReferenceUtil.generateRandom("MRN"));
 
                 PaymentDealerRequest newPaymentDealerRequest = paymentDealerRequestService.createRequestPayload(
                                 productRequest, Methods.AUTHORIZE);

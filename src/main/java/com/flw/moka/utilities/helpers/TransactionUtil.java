@@ -8,6 +8,7 @@ import com.flw.moka.entity.constants.Methods;
 import com.flw.moka.entity.models.Refunds;
 import com.flw.moka.entity.models.Transaction;
 import com.flw.moka.entity.request.ProductRequest;
+import com.flw.moka.entity.response.Meta;
 import com.flw.moka.entity.response.ProxyResponse;
 import com.flw.moka.exception.TransactionNotFoundException;
 import com.flw.moka.service.entity_service.TransactionService;
@@ -27,9 +28,9 @@ public class TransactionUtil {
 
         TimeUtil timeUtility = new TimeUtil();
 
-        transaction.setResponseCode(proxyResponse.getCode());
-        transaction.setResponseMessage(proxyResponse.getMessage());
-        transaction.setProvider(proxyResponse.getProvider());
+        transaction.setResponseCode(proxyResponse.getResponseCode());
+        transaction.setResponseMessage(proxyResponse.getResponseMessage());
+        transaction.setProvider(proxyResponse.getMeta().getProvider());
 
         switch (method) {
             case Methods.AUTHORIZE:
@@ -38,27 +39,28 @@ public class TransactionUtil {
                 transaction.setCurrency(productRequest.getCurrency());
                 transaction.setMask(productRequest.getCardNumber());
                 transaction.setTimeIn(timeUtility.getDateTime());
-                transaction.setTransactionReference(productRequest.getTransactionReference());
+                transaction.setPayloadReference(productRequest.getPayloadReference());
+                transaction.setTransactionReference(proxyResponse.getMeta().getTransactionReference());
                 transaction.setNarration("CARD Transaction");
-                if (proxyResponse.getExternalReference() != null) {
+                if (proxyResponse.getMeta().getExternalReference() != null) {
                     transaction.setExternalReference(productRequest.getExternalReference());
                     transaction.setTransactionStatus(Methods.AUTHORIZE.toUpperCase());
                 }
                 break;
             case Methods.CAPTURE:
-                transaction.setResponseCode(proxyResponse.getCode());
-                transaction.setResponseMessage(proxyResponse.getMessage());
-                if (proxyResponse.getExternalReference() != null) {
-                    transaction.setExternalReference(proxyResponse.getExternalReference());
+                transaction.setResponseCode(proxyResponse.getResponseCode());
+                transaction.setResponseMessage(proxyResponse.getResponseMessage());
+                if (proxyResponse.getMeta().getExternalReference() != null) {
+                    transaction.setExternalReference(proxyResponse.getMeta().getExternalReference());
                     transaction.setTransactionStatus(method.toUpperCase());
                     transaction.setTimeCaptured(timeUtility.getDateTime());
                 }
                 break;
             case Methods.VOID:
-                transaction.setResponseCode(proxyResponse.getCode());
-                transaction.setResponseMessage(proxyResponse.getMessage());
-                if (proxyResponse.getExternalReference() != null) {
-                    transaction.setExternalReference(proxyResponse.getExternalReference());
+                transaction.setResponseCode(proxyResponse.getResponseCode());
+                transaction.setResponseMessage(proxyResponse.getResponseMessage());
+                if (proxyResponse.getMeta().getExternalReference() != null) {
+                    transaction.setExternalReference(proxyResponse.getMeta().getExternalReference());
                     transaction.setTransactionStatus(method.toUpperCase());
                     transaction.setTimeVoided(timeUtility.getDateTime());
                 }
@@ -83,7 +85,7 @@ public class TransactionUtil {
                 logsUtil.setLogs(proxyResponse, productRequest, method);
 
                 saveTransactionToDatabase(productRequest, proxyResponse, transaction.get(), method);
-                throw new TransactionNotFoundException(proxyResponse.getMessage());
+                throw new TransactionNotFoundException(proxyResponse.getResponseMessage());
 
             }
 
@@ -91,6 +93,10 @@ public class TransactionUtil {
         } else {
             ProxyResponse proxyResponse = prepareResponseIfTransactionDoesNotExist(transactionReference, method);
             logsUtil.setLogs(proxyResponse, productRequest, method);
+
+            if (productRequest.getTransactionReference().equalsIgnoreCase("null")) {
+                throw new TransactionNotFoundException(proxyResponse.getResponseMessage());
+            }
 
             Transaction nonExisitingTransaction = new Transaction();
             nonExisitingTransaction.setAmount(productRequest.getAmount());
@@ -108,16 +114,20 @@ public class TransactionUtil {
                 saveTransactionToDatabase(productRequest, proxyResponse, nonExisitingTransaction, method);
             }
 
-            throw new TransactionNotFoundException(proxyResponse.getMessage());
+            throw new TransactionNotFoundException(proxyResponse.getResponseMessage());
         }
     }
 
     static ProxyResponse prepareResponseIfTransactionDoesNotExist(String reference, String method) {
         ProxyResponse proxyResponse = new ProxyResponse();
+        Meta meta = new Meta();
 
-        proxyResponse.setMessage(method.toUpperCase() + " error: This " + reference + " does not exist");
-        proxyResponse.setCode("RR");
-        proxyResponse.setProvider("MOKA");
+        proxyResponse
+                .setResponseMessage(
+                        method.toUpperCase() + " error: Transaction with ref: " + reference + " does not exist");
+        proxyResponse.setResponseCode("RR");
+        meta.setProvider("MOKA");
+        proxyResponse.setMeta(meta);
 
         return proxyResponse;
     }

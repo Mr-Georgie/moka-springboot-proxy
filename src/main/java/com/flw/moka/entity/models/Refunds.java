@@ -44,8 +44,11 @@ public class Refunds {
     @Column(name = "provider", nullable = true)
     private String provider;
 
-    @Column(name = "amount", nullable = true)
-    private Long amount;
+    @Column(name = "balance", nullable = true)
+    private Long balance;
+
+    @Column(name = "refunded_amount", nullable = true)
+    private Long refundedAmount;
 
     @Column(name = "currency", nullable = true)
     private String currency;

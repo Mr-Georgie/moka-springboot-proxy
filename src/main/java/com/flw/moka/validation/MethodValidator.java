@@ -51,9 +51,12 @@ public class MethodValidator {
 
             boolean transactionAlreadyRefunded = false;
 
-            if (findRefund.isPresent()
-                    && findRefund.get().getResponseCode().equalsIgnoreCase("03")) {
-                transactionAlreadyRefunded = true;
+            if (findRefund.isPresent() && findRefund.get().getResponseCode() != null) {
+                if (findRefund.get().getResponseCode().equalsIgnoreCase("03")) {
+                    if (findRefund.get().getBalance() == 0)
+                        transactionAlreadyRefunded = true;
+                }
+
             }
 
             String currentStatus = transaction.getTransactionStatus();
@@ -94,21 +97,21 @@ public class MethodValidator {
             RefundsUtil refundsUtil) {
         ProxyResponse proxyResponse = new ProxyResponse();
 
-        proxyResponse.setMessage(method.toUpperCase() + " has already been done on this transaction");
-        proxyResponse.setProvider("MOKA");
+        proxyResponse.setResponseMessage(method.toUpperCase() + " has already been done on this transaction");
+        proxyResponse.getMeta().setProvider("MOKA");
 
         logsUtil.setLogs(proxyResponse, productRequest, method);
 
         if (transactionUtil != null) {
-            proxyResponse.setCode(transaction.getResponseCode());
+            proxyResponse.setResponseCode(transaction.getResponseCode());
             transactionUtil.saveTransactionToDatabase(productRequest, proxyResponse, transaction, method);
         }
 
         if (refundsUtil != null) {
-            proxyResponse.setCode(refund.getResponseCode());
+            proxyResponse.setResponseCode(refund.getResponseCode());
             refundsUtil.saveRefundToDataBase(proxyResponse, refund, transaction);
         }
 
-        throw new TransactionMethodAlreadyDoneException(proxyResponse.getMessage());
+        throw new TransactionMethodAlreadyDoneException(proxyResponse.getResponseMessage());
     }
 }

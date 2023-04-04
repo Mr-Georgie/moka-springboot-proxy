@@ -25,7 +25,7 @@ public class LogsUtil {
         String jsonProductRequest = gson.toJson(productRequest);
         String jsonProxyResponse = gson.toJson(proxyResponse);
 
-        log.setExternalReference(proxyResponse.getExternalReference());
+        log.setExternalReference(proxyResponse.getMeta().getExternalReference());
         log.setBody(jsonProductRequest);
         log.setMethod(method);
         log.setResponse(jsonProxyResponse);

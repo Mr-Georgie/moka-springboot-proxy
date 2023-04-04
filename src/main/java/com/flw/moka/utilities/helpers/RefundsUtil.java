@@ -25,13 +25,18 @@ public class RefundsUtil {
 
         TimeUtil timeUtility = new TimeUtil();
 
-        if (refund.getAmount() == null) {
-            refund.setAmount(transaction.getAmount());
+        if (refund.getRefundedAmount() == null) {
+            refund.setRefundedAmount(transaction.getAmount());
         }
 
-        refund.setResponseCode(proxyResponse.getCode());
-        refund.setResponseMessage(proxyResponse.getMessage());
-        refund.setProvider(proxyResponse.getProvider());
+        if (refund.getBalance() == null || refund.getBalance() != 0) {
+            Long balance = transaction.getAmount() - refund.getRefundedAmount();
+            refund.setBalance(balance);
+        }
+
+        refund.setResponseCode(proxyResponse.getResponseCode());
+        refund.setResponseMessage(proxyResponse.getResponseMessage());
+        refund.setProvider(proxyResponse.getMeta().getProvider());
 
         refund.setCurrency(transaction.getCurrency());
         refund.setMask(transaction.getMask());
@@ -54,18 +59,30 @@ public class RefundsUtil {
 
             if (refund.get().getResponseCode() == "03") {
                 ProxyResponse proxyResponse = prepareResponseIfTransactionDoesNotExist(transactionReference, method);
-                proxyResponse.setMessage("This has been refunded");
+                proxyResponse.setResponseMessage("This has been refunded");
                 logsUtil.setLogs(proxyResponse, productRequest, method);
 
-                throw new TransactionMethodAlreadyDoneException(proxyResponse.getMessage());
+                throw new TransactionMethodAlreadyDoneException(proxyResponse.getResponseMessage());
             }
+
+            Refunds existingRefund = refund.get();
+
+            Long totalAmountRefundable = existingRefund.getRefundedAmount() + existingRefund.getBalance();
+
+            if (totalAmountRefundable.equals(existingRefund.getRefundedAmount())) {
+                return refund.get();
+            }
+
+            Long updatedRefundAmount = productRequest.getAmount() + existingRefund.getRefundedAmount();
+
+            existingRefund.setRefundedAmount(updatedRefundAmount);
 
             return refund.get();
         } else {
             Refunds newRefund = new Refunds();
 
             if (productRequest.getAmount() != null) {
-                newRefund.setAmount(productRequest.getAmount());
+                newRefund.setRefundedAmount(productRequest.getAmount());
             }
 
             return newRefund;
@@ -75,8 +92,8 @@ public class RefundsUtil {
     static ProxyResponse prepareResponseIfTransactionDoesNotExist(String reference, String method) {
         ProxyResponse proxyResponse = new ProxyResponse();
 
-        proxyResponse.setCode("RR");
-        proxyResponse.setProvider("MOKA");
+        proxyResponse.setResponseCode("RR");
+        proxyResponse.getMeta().setProvider("MOKA");
 
         return proxyResponse;
     }

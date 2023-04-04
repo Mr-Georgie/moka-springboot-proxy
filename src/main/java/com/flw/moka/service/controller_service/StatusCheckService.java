@@ -62,7 +62,7 @@ public class StatusCheckService {
         } else {
             Optional<Transaction> findTransaction = transactionService.getTransaction(reference);
 
-            if (findTransaction.isPresent()) {
+            if (findTransaction.isPresent() && !findTransaction.get().getResponseCode().equalsIgnoreCase("RR")) {
                 Transaction transaction = findTransaction.get();
                 String status = transaction.getTransactionStatus();
                 statusCheckResponse.setTransactionDetail(transaction);

@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import com.flw.moka.entity.response.Meta;
 import com.flw.moka.entity.response.ProxyResponse;
 import com.flw.moka.exception.BadCredentialsException;
 import com.flw.moka.exception.InvalidProductRequestException;
@@ -20,19 +21,19 @@ import com.flw.moka.exception.TransactionShouldBeVoidedException;
 public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler {
 
     private ProxyResponse responseCreator() {
+        Meta meta = new Meta();
         ProxyResponse proxyResponse = new ProxyResponse();
-        proxyResponse.setTransactionReference("N/A");
-        proxyResponse.setExternalReference("N/A");
-        proxyResponse.setProvider("MOKA");
-        proxyResponse.setCode("RR");
 
+        meta.setProvider("MOKA");
+        proxyResponse.setResponseCode("RR");
+        proxyResponse.setMeta(meta);
         return proxyResponse;
     }
 
     @ExceptionHandler(TransactionNotFoundException.class)
     public ResponseEntity<Object> handleTransactionNotFoundException(TransactionNotFoundException ex) {
         ProxyResponse proxyResponse = responseCreator();
-        proxyResponse.setMessage(ex.getMessage());
+        proxyResponse.setResponseMessage(ex.getMessage());
         return new ResponseEntity<>(proxyResponse, HttpStatus.NOT_FOUND);
     }
 
@@ -40,14 +41,14 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
     protected ResponseEntity<Object> handleTransactionMethodAlreadyDoneException(
             TransactionMethodAlreadyDoneException ex) {
         ProxyResponse proxyResponse = responseCreator();
-        proxyResponse.setMessage(ex.getMessage());
+        proxyResponse.setResponseMessage(ex.getMessage());
         return new ResponseEntity<>(proxyResponse, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(TransactionShouldBeVoidedException.class)
     protected ResponseEntity<Object> handleTransactionShouldBeVoidedException(TransactionShouldBeVoidedException ex) {
         ProxyResponse proxyResponse = responseCreator();
-        proxyResponse.setMessage(ex.getMessage());
+        proxyResponse.setResponseMessage(ex.getMessage());
         return new ResponseEntity<>(proxyResponse, HttpStatus.BAD_REQUEST);
     }
 
@@ -55,35 +56,35 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
     protected ResponseEntity<Object> handleTransactionShouldBeRefundedException(
             TransactionShouldBeRefundedException ex) {
         ProxyResponse proxyResponse = responseCreator();
-        proxyResponse.setMessage(ex.getMessage());
+        proxyResponse.setResponseMessage(ex.getMessage());
         return new ResponseEntity<>(proxyResponse, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(TransactionNotCapturedException.class)
     protected ResponseEntity<Object> handleTransactionNotCapturedException(TransactionNotCapturedException ex) {
         ProxyResponse proxyResponse = responseCreator();
-        proxyResponse.setMessage(ex.getMessage());
+        proxyResponse.setResponseMessage(ex.getMessage());
         return new ResponseEntity<>(proxyResponse, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(NoMethodNamePassedException.class)
     protected ResponseEntity<Object> handleNoMethodPassedException(NoMethodNamePassedException ex) {
         ProxyResponse proxyResponse = responseCreator();
-        proxyResponse.setMessage(ex.getMessage());
+        proxyResponse.setResponseMessage(ex.getMessage());
         return new ResponseEntity<>(proxyResponse, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(InvalidProductRequestException.class)
     protected ResponseEntity<Object> handleInvalidProductRequestException(InvalidProductRequestException ex) {
         ProxyResponse proxyResponse = responseCreator();
-        proxyResponse.setMessage(ex.getMessage());
+        proxyResponse.setResponseMessage(ex.getMessage());
         return new ResponseEntity<>(proxyResponse, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(BadCredentialsException.class)
     protected ResponseEntity<Object> handleBadCredentialsException(BadCredentialsException ex) {
         ProxyResponse proxyResponse = responseCreator();
-        proxyResponse.setMessage(ex.getMessage());
+        proxyResponse.setResponseMessage(ex.getMessage());
         return new ResponseEntity<>(proxyResponse, HttpStatus.BAD_REQUEST);
     }
 
