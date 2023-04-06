@@ -43,9 +43,7 @@ public class CaptureService {
 		Transaction transaction = transactionUtil.getTransactionIfExistInDB(productRequest, Methods.CAPTURE);
 
 		methodValidator
-				.preventDuplicateMethodCall(transaction, Methods.CAPTURE, productRequest, logsUtil, transactionUtil,
-						null,
-						null);
+				.preventDuplicateMethodCall(transaction, Methods.CAPTURE, productRequest, logsUtil, transactionUtil);
 
 		ResponseEntity<ProviderResponse> providerResponseEntity = providerApiUtil.makeProviderApiCall(endpointURI,
 				providerPayload);

@@ -13,7 +13,7 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 @Service
-public class RefundsServiceImpl implements RefundsService {
+public class RefundsEntityServiceImpl implements RefundsEntityService {
 
     RefundsRepository refundsRepository;
     ProxyResponseService proxyResponseService;
@@ -25,8 +25,14 @@ public class RefundsServiceImpl implements RefundsService {
     }
 
     @Override
-    public Optional<Refunds> getRefund(String ref) {
-        Optional<Refunds> refund = refundsRepository.findByTransactionReference(ref);
+    public Optional<Refunds> getRefundByRefundReference(String reference) {
+        Optional<Refunds> refund = refundsRepository.findByRefundReference(reference);
+        return refund;
+    }
+
+    @Override
+    public Optional<Refunds> getRefundByTransactionReference(String reference) {
+        Optional<Refunds> refund = refundsRepository.findByTransactionReference(reference);
         return refund;
     }
 }

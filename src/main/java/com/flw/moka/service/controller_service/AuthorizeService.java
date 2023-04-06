@@ -46,13 +46,16 @@ public class AuthorizeService {
 
                 ResponseEntity<ProviderResponse> responseEntity = providerApiUtil.makeProviderApiCall(
                                 endpointURI, providerPayload);
+
                 Optional<ProviderResponse> providerResponseBody = providerApiUtil
                                 .handleNoProviderResponse(responseEntity);
+
                 Optional<ProviderResponseData> providerResponseData = providerApiUtil
                                 .unwrapProviderResponse(providerResponseBody);
 
                 ProductRequest productRequestWithMaskedCardNumber = maskCardNumberInProductRequestUtility
                                 .mask(productRequest);
+
 
                 ProxyResponse proxyResponse = proxyResponseService.createProxyResponse(providerResponseData,
                                 providerResponseBody,
@@ -62,7 +65,7 @@ public class AuthorizeService {
 
                 addEntitiesToDatabase(proxyResponse, productRequestWithMaskedCardNumber);
 
-                return ResponseEntity.status(HttpStatus.CREATED).body(proxyResponse);
+                return ResponseEntity.status(HttpStatus.OK).body(proxyResponse);
         }
 
         private void addEntitiesToDatabase(ProxyResponse proxyResponse, ProductRequest productRequest) {

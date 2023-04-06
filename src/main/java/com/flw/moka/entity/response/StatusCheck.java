@@ -1,5 +1,8 @@
 package com.flw.moka.entity.response;
 
+import com.flw.moka.entity.models.Refunds;
+import com.flw.moka.entity.models.Transaction;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,8 +12,9 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class StatusCheckResponse {
-
+public class StatusCheck {
     private String statusMessage;
-    private StatusMeta statusMeta;
+    private Transaction transactionDetail;
+    private Refunds refundDetail;
+    private PaymentDetail providerResponse;
 }

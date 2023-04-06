@@ -11,6 +11,7 @@ import com.flw.moka.entity.request.ProductRequest;
 import com.flw.moka.entity.response.Meta;
 import com.flw.moka.entity.response.ProxyResponse;
 import com.flw.moka.exception.TransactionNotFoundException;
+import com.flw.moka.service.entity_service.RefundsEntityService;
 import com.flw.moka.service.entity_service.TransactionService;
 
 import lombok.AllArgsConstructor;
@@ -20,6 +21,7 @@ import lombok.AllArgsConstructor;
 public class TransactionUtil {
 
     TransactionService transactionService;
+    RefundsEntityService refundsService;
     LogsUtil logsUtil;
     RefundsUtil refundsUtil;
 
@@ -74,14 +76,14 @@ public class TransactionUtil {
     }
 
     public Transaction getTransactionIfExistInDB(ProductRequest productRequest, String method) {
-        String transactionReference = productRequest.getTransactionReference();
+        String reference = productRequest.getTransactionReference();
         TimeUtil timeUtility = new TimeUtil();
-        Optional<Transaction> transaction = transactionService.getTransaction(transactionReference);
+        Optional<Transaction> transaction = transactionService.getTransaction(reference);
 
         if (transaction.isPresent()) {
 
             if (transaction.get().getTransactionStatus() == null) {
-                ProxyResponse proxyResponse = prepareResponseIfTransactionDoesNotExist(transactionReference, method);
+                ProxyResponse proxyResponse = prepareResponseIfTransactionDoesNotExist(reference, method);
                 logsUtil.setLogs(proxyResponse, productRequest, method);
 
                 saveTransactionToDatabase(productRequest, proxyResponse, transaction.get(), method);
@@ -91,7 +93,16 @@ public class TransactionUtil {
 
             return transaction.get();
         } else {
-            ProxyResponse proxyResponse = prepareResponseIfTransactionDoesNotExist(transactionReference, method);
+            Optional<Refunds> findRefund = refundsService.getRefundByRefundReference(reference);
+
+            if (findRefund.isPresent()) {
+                String transactionReference = findRefund.get().getTransactionReference();
+                Optional<Transaction> refundedTransaction = transactionService.getTransaction(transactionReference);
+
+                return refundedTransaction.get();
+            }
+
+            ProxyResponse proxyResponse = prepareResponseIfTransactionDoesNotExist(reference, method);
             logsUtil.setLogs(proxyResponse, productRequest, method);
 
             if (productRequest.getTransactionReference().equalsIgnoreCase("null")) {

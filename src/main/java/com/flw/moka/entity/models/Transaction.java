@@ -34,7 +34,7 @@ public class Transaction {
     @Column(name = "transaction_reference", nullable = false, unique = true)
     private String transactionReference;
 
-    @Column(name = "payload_reference", nullable = false)
+    @Column(name = "payload_reference", nullable = true)
     private String payloadReference;
 
     @Column(name = "external_reference", nullable = true)

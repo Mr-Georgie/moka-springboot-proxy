@@ -68,7 +68,6 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             stringBuilder.append(line);
         }
         String requestContent = stringBuilder.toString();
-        // System.out.println(requestContent);
 
         Gson gson = new Gson();
 

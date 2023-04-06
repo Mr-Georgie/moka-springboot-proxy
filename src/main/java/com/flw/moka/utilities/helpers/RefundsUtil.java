@@ -7,9 +7,10 @@ import org.springframework.stereotype.Component;
 import com.flw.moka.entity.models.Refunds;
 import com.flw.moka.entity.models.Transaction;
 import com.flw.moka.entity.request.ProductRequest;
+import com.flw.moka.entity.response.Meta;
 import com.flw.moka.entity.response.ProxyResponse;
 import com.flw.moka.exception.TransactionMethodAlreadyDoneException;
-import com.flw.moka.service.entity_service.RefundsService;
+import com.flw.moka.service.entity_service.RefundsEntityService;
 
 import lombok.AllArgsConstructor;
 
@@ -17,22 +18,16 @@ import lombok.AllArgsConstructor;
 @Component
 public class RefundsUtil {
 
-    RefundsService refundsService;
+    RefundsEntityService refundsService;
     LogsUtil logsUtil;
+    GenerateReferenceUtil generateReferenceUtil;
 
     public void saveRefundToDataBase(ProxyResponse proxyResponse,
-            Refunds refund, Transaction transaction) {
+            Refunds existingRefund, Transaction transaction) {
 
         TimeUtil timeUtility = new TimeUtil();
 
-        if (refund.getRefundedAmount() == null) {
-            refund.setRefundedAmount(transaction.getAmount());
-        }
-
-        if (refund.getBalance() == null || refund.getBalance() != 0) {
-            Long balance = transaction.getAmount() - refund.getRefundedAmount();
-            refund.setBalance(balance);
-        }
+        Refunds refund = computeBalance(proxyResponse, existingRefund, transaction);
 
         refund.setResponseCode(proxyResponse.getResponseCode());
         refund.setResponseMessage(proxyResponse.getResponseMessage());
@@ -42,58 +37,150 @@ public class RefundsUtil {
         refund.setMask(transaction.getMask());
         refund.setTimeRefunded(timeUtility.getDateTime());
         refund.setTransactionReference(transaction.getTransactionReference());
+        refund.setPayloadReference(transaction.getPayloadReference());
+        refund.setRefundReference(generateReferenceUtil.generateRandom("REF"));
         refund.setExternalReference(transaction.getExternalReference());
         refund.setNarration("CARD Transaction");
         refund.setCountry("TR");
+        refund.setLastRefund(true);
+
+        Meta meta = new Meta();
+
+        meta.setProvider(proxyResponse.getMeta().getProvider());
+        meta.setTransactionReference(refund.getRefundReference());
+        proxyResponse.setMeta(meta);
 
         refundsService.saveRefund(refund);
     }
 
     public Refunds checkIfRefundExistInDB(ProductRequest productRequest, String method) {
 
-        String transactionReference = productRequest.getTransactionReference();
+        String refundReference = productRequest.getTransactionReference();
 
-        Optional<Refunds> refund = refundsService.getRefund(transactionReference);
+        Optional<Refunds> findRefund = refundsService.getRefundByRefundReference(refundReference);
 
-        if (refund.isPresent()) {
+        if (findRefund.isPresent()) {
 
-            if (refund.get().getResponseCode() == "03") {
-                ProxyResponse proxyResponse = prepareResponseIfTransactionDoesNotExist(transactionReference, method);
+            if (findRefund.get().getResponseCode().equals("03") && findRefund.get().getBalance() == 0) {
+                ProxyResponse proxyResponse = prepareResponseIfSuccessfulRefundsExist(refundReference, method);
                 proxyResponse.setResponseMessage("This has been refunded");
                 logsUtil.setLogs(proxyResponse, productRequest, method);
 
                 throw new TransactionMethodAlreadyDoneException(proxyResponse.getResponseMessage());
             }
 
-            Refunds existingRefund = refund.get();
+            if (findRefund.get().getLastRefund() == false) {
+                ProxyResponse proxyResponse = prepareResponseIfSuccessfulRefundsExist(refundReference, method);
+                proxyResponse.setResponseMessage("Please provide the latest refund reference");
+                logsUtil.setLogs(proxyResponse, productRequest, method);
 
-            Long totalAmountRefundable = existingRefund.getRefundedAmount() + existingRefund.getBalance();
-
-            if (totalAmountRefundable.equals(existingRefund.getRefundedAmount())) {
-                return refund.get();
+                throw new TransactionMethodAlreadyDoneException(proxyResponse.getResponseMessage());
             }
 
-            Long updatedRefundAmount = productRequest.getAmount() + existingRefund.getRefundedAmount();
+            Refunds existingRefund = computeRefundedAmount(findRefund, productRequest);
 
-            existingRefund.setRefundedAmount(updatedRefundAmount);
+            return existingRefund;
 
-            return refund.get();
         } else {
-            Refunds newRefund = new Refunds();
+
+            Optional<Refunds> findRefundByTransactionReference = refundsService
+                    .getRefundByTransactionReference(refundReference);
+
+            if (findRefundByTransactionReference.isPresent()) {
+
+                if (findRefundByTransactionReference.get().getBalance() == 0) {
+                    ProxyResponse proxyResponse = prepareResponseIfSuccessfulRefundsExist(refundReference, method);
+                    proxyResponse.setResponseMessage("This has been refunded");
+                    logsUtil.setLogs(proxyResponse, productRequest, method);
+
+                    throw new TransactionMethodAlreadyDoneException(proxyResponse.getResponseMessage());
+                }
+
+                ProxyResponse proxyResponse = prepareResponseIfSuccessfulRefundsExist(refundReference, method);
+                proxyResponse.setResponseMessage("Please provide the refund reference for this transaction");
+                logsUtil.setLogs(proxyResponse, productRequest, method);
+
+                throw new TransactionMethodAlreadyDoneException(proxyResponse.getResponseMessage());
+            }
+
+            Refunds refund = new Refunds();
 
             if (productRequest.getAmount() != null) {
-                newRefund.setRefundedAmount(productRequest.getAmount());
+                refund.setRefundedAmount(productRequest.getAmount());
+            }
+
+            refund.setRefundReference(refundReference);
+            refund.setResponseCode("RR");
+            refund.setResponseMessage("Initiating refund...");
+
+            return refund;
+        }
+    }
+
+    private Refunds computeBalance(ProxyResponse proxyResponse, Refunds refund, Transaction transaction) {
+
+        Refunds newRefund = new Refunds();
+
+        if (!proxyResponse.getResponseCode().equalsIgnoreCase("RR")) {
+            if (refund.getRefundedAmount() == null)
+                newRefund.setRefundedAmount(transaction.getAmount());
+            else
+                newRefund.setRefundedAmount(refund.getRefundedAmount());
+
+            if (refund.getBalance() == null || refund.getBalance() != 0) {
+                Long balance = transaction.getAmount() - newRefund.getRefundedAmount();
+                newRefund.setBalance(balance);
             }
 
             return newRefund;
         }
+
+        newRefund.setBalance(transaction.getAmount());
+
+        return newRefund;
     }
 
-    static ProxyResponse prepareResponseIfTransactionDoesNotExist(String reference, String method) {
-        ProxyResponse proxyResponse = new ProxyResponse();
+    private Refunds computeRefundedAmount(Optional<Refunds> findRefund, ProductRequest productRequest) {
+        Refunds existingRefund = findRefund.get();
 
+        Refunds newRefund = new Refunds();
+
+        Long totalAmountRefundable = existingRefund.getRefundedAmount() +
+                existingRefund.getBalance();
+
+        if (totalAmountRefundable.equals(existingRefund.getRefundedAmount())) {
+            return findRefund.get();
+        }
+
+        Long updatedRefundAmount = productRequest.getAmount() +
+                existingRefund.getRefundedAmount();
+
+        existingRefund.setLastRefund(false);
+
+        newRefund.setRefundedAmount(updatedRefundAmount);
+        newRefund.setResponseCode(existingRefund.getResponseCode());
+        newRefund.setResponseMessage(existingRefund.getResponseMessage());
+        newRefund.setProvider(existingRefund.getProvider());
+
+        newRefund.setCurrency(existingRefund.getCurrency());
+        newRefund.setMask(existingRefund.getMask());
+        newRefund.setTimeRefunded(existingRefund.getTimeRefunded());
+        newRefund.setTransactionReference(existingRefund.getTransactionReference());
+        newRefund.setRefundReference(existingRefund.getRefundReference());
+        newRefund.setExternalReference(existingRefund.getExternalReference());
+        newRefund.setNarration(existingRefund.getNarration());
+        newRefund.setCountry(existingRefund.getCountry());
+
+        return newRefund;
+    }
+
+    private ProxyResponse prepareResponseIfSuccessfulRefundsExist(String reference, String method) {
+        ProxyResponse proxyResponse = new ProxyResponse();
+        Meta meta = new Meta();
+
+        meta.setProvider("MOKA");
         proxyResponse.setResponseCode("RR");
-        proxyResponse.getMeta().setProvider("MOKA");
+        proxyResponse.setMeta(meta);
 
         return proxyResponse;
     }

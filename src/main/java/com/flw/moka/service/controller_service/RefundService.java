@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.flw.moka.entity.constants.Methods;
 import com.flw.moka.entity.models.Refunds;
 import com.flw.moka.entity.models.Transaction;
+import com.flw.moka.entity.request.PaymentDealerRequest;
 import com.flw.moka.entity.request.ProductRequest;
 import com.flw.moka.entity.request.ProviderPayload;
 import com.flw.moka.entity.response.ProviderResponse;
@@ -36,15 +37,27 @@ public class RefundService {
 	MethodValidator methodValidator;
 
 	public ResponseEntity<ProxyResponse> sendProviderPayload(ProviderPayload providerPayload,
-			ProductRequest productRequest, Transaction transaction, Refunds refund)
+			ProductRequest productRequest, Transaction transaction)
 			throws ParseException {
 
+		String method = Methods.REFUND;
+
 		methodValidator
-				.preventDuplicateMethodCall(transaction, Methods.REFUND, productRequest, logsUtil, null, refund,
-						refundsUtil);
+				.preventDuplicateMethodCall(transaction, method, productRequest, logsUtil, null);
 
 		String refundEndpoint = environment.getProperty("provider.endpoints.refund");
 		URI endpointURI = URI.create(refundEndpoint);
+
+		Refunds refund = refundsUtil.checkIfRefundExistInDB(productRequest, method);
+
+		PaymentDealerRequest paymentDealerRequest = providerPayload.getPaymentDealerRequest();
+
+		String reference = refund.getTransactionReference() == null ? refund.getRefundReference()
+				: refund.getTransactionReference();
+
+		paymentDealerRequest.setOtherTrxCode(reference);
+
+		providerPayload.setPaymentDealerRequest(paymentDealerRequest);
 
 		ResponseEntity<ProviderResponse> responseEntity = providerApiUtil.makeProviderApiCall(
 				endpointURI,
@@ -56,15 +69,16 @@ public class RefundService {
 
 		ProxyResponse proxyResponse = proxyResponseService.createProxyResponse(providerResponseData,
 				providerResponseBody,
-				productRequest, Methods.REFUND);
+				productRequest, method);
 
 		addEntitiesToDatabase(proxyResponse, productRequest, transaction, refund);
 
-		return ResponseEntity.status(HttpStatus.CREATED).body(proxyResponse);
+		return ResponseEntity.status(HttpStatus.OK).body(proxyResponse);
 	}
 
 	private void addEntitiesToDatabase(ProxyResponse proxyResponse, ProductRequest productRequest,
 			Transaction transaction, Refunds refund) {
+
 		logsUtil.setLogs(proxyResponse, productRequest, Methods.REFUND);
 
 		refundsUtil.saveRefundToDataBase(proxyResponse, refund, transaction);

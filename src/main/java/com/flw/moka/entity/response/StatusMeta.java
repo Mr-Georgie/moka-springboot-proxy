@@ -9,8 +9,12 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class StatusCheckResponse {
-
-    private String statusMessage;
-    private StatusMeta statusMeta;
+public class StatusMeta {
+    String transactionReference;
+    String cardholderName;
+    String mask;
+    String paymentDate;
+    Long amount;
+    Long refundedAmount;
+    String currency;
 }

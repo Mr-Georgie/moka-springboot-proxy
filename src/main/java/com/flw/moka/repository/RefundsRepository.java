@@ -7,5 +7,7 @@ import org.springframework.data.repository.CrudRepository;
 import com.flw.moka.entity.models.Refunds;
 
 public interface RefundsRepository extends CrudRepository<Refunds, Long> {
+    Optional<Refunds> findByRefundReference(String refundReference);
+
     Optional<Refunds> findByTransactionReference(String transactionReference);
 }

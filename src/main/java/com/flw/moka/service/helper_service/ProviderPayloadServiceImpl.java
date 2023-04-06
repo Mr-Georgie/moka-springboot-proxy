@@ -14,13 +14,14 @@ import lombok.AllArgsConstructor;
 @Service
 public class ProviderPayloadServiceImpl implements ProviderPayloadService {
 
-    ProviderPayloadUtil providerPayloadRepository;
-    PaymentDealerAuthenticationUtil paymentDealerAuthenticationRepository;
+    ProviderPayloadUtil providerPayloadUtil;
+    PaymentDealerAuthenticationUtil paymentDealerAuthenticationUtil;
 
     @Override
     public ProviderPayload savePaymentDealerAuthAndReq(PaymentDealerRequest paymentDealerRequest) {
 
-        PaymentDealerAuthentication paymentDealerAuthentication = paymentDealerAuthenticationRepository.setPaymentDealerDetails();
-        return providerPayloadRepository.savePayload(paymentDealerAuthentication, paymentDealerRequest);
+        PaymentDealerAuthentication paymentDealerAuthentication = paymentDealerAuthenticationUtil
+                .setPaymentDealerDetails();
+        return providerPayloadUtil.savePayload(paymentDealerAuthentication, paymentDealerRequest);
     }
 }

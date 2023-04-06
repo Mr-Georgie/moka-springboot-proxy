@@ -6,14 +6,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import com.flw.moka.entity.constants.Methods;
-import com.flw.moka.entity.models.Refunds;
 import com.flw.moka.entity.models.Transaction;
 import com.flw.moka.entity.request.ProductRequest;
 import com.flw.moka.entity.request.ProviderPayload;
 import com.flw.moka.entity.response.ProxyResponse;
 import com.flw.moka.service.controller_service.RefundService;
 import com.flw.moka.service.controller_service.VoidService;
-import com.flw.moka.utilities.helpers.RefundsUtil;
 import com.flw.moka.utilities.helpers.TimeUtil;
 import com.flw.moka.utilities.helpers.TransactionUtil;
 import com.flw.moka.validation.MethodValidator;
@@ -25,7 +23,6 @@ import lombok.AllArgsConstructor;
 public class VoidRefundRouter {
 
     TransactionUtil transactionUtil;
-    RefundsUtil refundsUtil;
     VoidService voidService;
     RefundService refundService;
     MethodValidator methodValidator;
@@ -50,13 +47,10 @@ public class VoidRefundRouter {
 
         if (isTransactionUpTo24Hours) {
 
-            Refunds refund = refundsUtil
-                    .checkIfRefundExistInDB(productRequest, method);
-
             methodValidator.preventVoidOrRefundIfNotCaptured(Methods.REFUND, transaction);
             ResponseEntity<ProxyResponse> responseEntity = refundService.sendProviderPayload(
                     providerPayload,
-                    productRequest, transaction, refund);
+                    productRequest, transaction);
 
             return responseEntity;
         } else {

@@ -21,24 +21,23 @@ public class ProxyResponseUtil {
 
         ProviderResponse providerResponse = bodyEntity.get();
 
+        meta.setTransactionReference(productRequest.getTransactionReference());
+        meta.setPayloadReference(productRequest.getPayloadReference());
+        meta.setProvider("MOKA");
+
         if (dataEntity.isPresent()) {
             formatSuccessfulResponseBasedOnMethod(method);
-            meta.setTransactionReference(productRequest.getTransactionReference());
-            meta.setPayloadReference(productRequest.getPayloadReference());
             meta.setExternalReference(dataEntity.get().getVirtualPosOrderId());
 
             proxyResponse.setMeta(meta);
             proxyResponse.setProviderResponse(providerResponse);
-            proxyResponse.getMeta().setProvider("MOKA");
         } else {
 
             String exactProviderMessage = formatProviderResponseResultCode(providerResponse);
 
             proxyResponse.setResponseMessage(method.toUpperCase() + " Failed: " + exactProviderMessage);
             proxyResponse.setResponseCode("RR");
-            proxyResponse.getMeta().setTransactionReference(productRequest.getTransactionReference());
-            proxyResponse.getMeta().setPayloadReference(productRequest.getPayloadReference());
-            proxyResponse.getMeta().setProvider("MOKA");
+            proxyResponse.setMeta(meta);
             proxyResponse.setProviderResponse(providerResponse);
         }
         return proxyResponse;
