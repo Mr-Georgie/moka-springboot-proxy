@@ -55,13 +55,8 @@ public class CaptureService {
 
 		addEntitiesToDatabase(proxyResponse, productRequest, transaction);
 
-		return ResponseEntity.status(HttpStatus.CREATED).body(proxyResponse);
+		return ResponseEntity.status(HttpStatus.OK).body(proxyResponse);
 	}
-
-	// private void HasCaptureBeenDoneAlready(Transaction transaction, String
-	// method) {
-	// methodValidator.preventDuplicateMethodCall(transaction, method);
-	// }
 
 	private void addEntitiesToDatabase(ProxyResponse proxyResponse, ProductRequest productRequest,
 			Transaction transaction) {

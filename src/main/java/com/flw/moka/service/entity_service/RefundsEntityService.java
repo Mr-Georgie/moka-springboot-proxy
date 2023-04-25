@@ -10,4 +10,6 @@ public interface RefundsEntityService {
     Optional<Refunds> getRefundByRefundReference(String ref);
 
     Optional<Refunds> getRefundByTransactionReference(String reference);
+
+    Optional<Refunds> findLastTransactionOccurrence(String reference);
 }

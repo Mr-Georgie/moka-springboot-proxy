@@ -37,8 +37,11 @@ public class Refunds {
     @Column(name = "payload_reference", nullable = true)
     private String payloadReference;
 
-    @Column(name = "refund_reference", nullable = false)
+    @Column(name = "refund_reference", nullable = true)
     private String refundReference;
+
+    @Column(name = "refund_id", nullable = true)
+    private String refundId;
 
     @Column(name = "external_reference", nullable = true)
     private String externalReference;
@@ -72,7 +75,4 @@ public class Refunds {
 
     @Column(name = "response_code", nullable = false)
     private String responseCode;
-
-    @Column(name = "last_refund", nullable = true)
-    private Boolean lastRefund;
 }

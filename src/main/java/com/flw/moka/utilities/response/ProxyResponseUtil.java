@@ -26,7 +26,7 @@ public class ProxyResponseUtil {
         meta.setProvider("MOKA");
 
         if (dataEntity.isPresent()) {
-            formatSuccessfulResponseBasedOnMethod(method);
+            formatSuccessfulResponseBasedOnMethod(method, dataEntity.get());
             meta.setExternalReference(dataEntity.get().getVirtualPosOrderId());
 
             proxyResponse.setMeta(meta);
@@ -43,7 +43,8 @@ public class ProxyResponseUtil {
         return proxyResponse;
     }
 
-    private ProxyResponse formatSuccessfulResponseBasedOnMethod(String method) {
+    private ProxyResponse formatSuccessfulResponseBasedOnMethod(String method, 
+            ProviderResponseData dataEntity) {
         if (method.equalsIgnoreCase(Methods.AUTHORIZE)) {
             proxyResponse.setResponseMessage("Pending Capture");
             proxyResponse.setResponseCode("02");
@@ -56,6 +57,7 @@ public class ProxyResponseUtil {
         } else if (method.equalsIgnoreCase(Methods.REFUND)) {
             proxyResponse.setResponseMessage("Refund Successful");
             proxyResponse.setResponseCode("03");
+            meta.setRefundId(dataEntity.getRefundRequestId());
         }
 
         return proxyResponse;

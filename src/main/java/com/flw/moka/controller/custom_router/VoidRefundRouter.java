@@ -40,6 +40,8 @@ public class VoidRefundRouter {
 
         Transaction transaction = transactionUtil.getTransactionIfExistInDB(productRequest, method);
 
+        methodValidator.preventVoidOrRefundIfNotCaptured(Methods.REFUND, transaction);
+
         String transactionTimeCaptured = transaction.getTimeCaptured();
 
         TimeUtil timeUtility = new TimeUtil();
@@ -47,7 +49,6 @@ public class VoidRefundRouter {
 
         if (isTransactionUpTo24Hours) {
 
-            methodValidator.preventVoidOrRefundIfNotCaptured(Methods.REFUND, transaction);
             ResponseEntity<ProxyResponse> responseEntity = refundService.sendProviderPayload(
                     providerPayload,
                     productRequest, transaction);
@@ -56,7 +57,6 @@ public class VoidRefundRouter {
         } else {
 
             methodValidator.preventVoidOrRefundIfNotCaptured(Methods.VOID, transaction);
-
             ResponseEntity<ProxyResponse> responseEntity = voidService.sendProviderPayload(
                     providerPayload,
                     productRequest, transaction);

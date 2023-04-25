@@ -10,4 +10,8 @@ public interface RefundsRepository extends CrudRepository<Refunds, Long> {
     Optional<Refunds> findByRefundReference(String refundReference);
 
     Optional<Refunds> findByTransactionReference(String transactionReference);
+
+    // Optional<Refunds> findFirstByOrderByTransactionReferenceAsc();
+
+    Optional<Refunds> findFirstByTransactionReferenceOrderByIdDesc(String transactionReference);
 }

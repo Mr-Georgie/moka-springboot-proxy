@@ -58,14 +58,8 @@ public class VoidService {
 
 		addEntitiesToDatabase(proxyResponse, productRequest, transaction);
 
-		return ResponseEntity.status(HttpStatus.CREATED).body(proxyResponse);
+		return ResponseEntity.status(HttpStatus.OK).body(proxyResponse);
 	}
-
-	// private void HasVoidBeenDoneAlready(Transaction transaction, String method,
-	// ProductRequest productRequest) {
-	// methodValidator.preventDuplicateMethodCall(transaction, method,
-	// productRequest);
-	// }
 
 	private void addEntitiesToDatabase(ProxyResponse proxyResponse, ProductRequest productRequest,
 			Transaction transaction) {

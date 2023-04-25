@@ -35,4 +35,10 @@ public class RefundsEntityServiceImpl implements RefundsEntityService {
         Optional<Refunds> refund = refundsRepository.findByTransactionReference(reference);
         return refund;
     }
+
+    @Override
+    public Optional<Refunds> findLastTransactionOccurrence(String reference) {
+        Optional<Refunds> refund = refundsRepository.findFirstByTransactionReferenceOrderByIdDesc(reference);
+        return refund;
+    }
 }
