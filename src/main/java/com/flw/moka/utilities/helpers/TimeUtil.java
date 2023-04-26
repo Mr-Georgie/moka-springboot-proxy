@@ -15,6 +15,7 @@ public class TimeUtil {
     }
 
     public Boolean isTransactionUpTo24Hours(String dateString) throws ParseException {
+        
         Long transactionTimeMillis = timeInMilliSec(dateString);
 
         Long currentTimeMillis = System.currentTimeMillis();

@@ -29,13 +29,15 @@ public class CaptureController {
         public ResponseEntity<ProxyResponse> saveCardParams(@RequestBody ProductRequest productRequest)
                         throws URISyntaxException {
 
+                String method = Methods.CAPTURE;
+
                 ProviderPayload newProviderPayload = providerPayloadService
-                        .createNewProviderPayload(productRequest, Methods.CAPTURE);
+                        .createNewProviderPayload(productRequest, method);
 
                 ResponseEntity<ProxyResponse> responseEntity = captureService.sendProviderPayload(
                                 newProviderPayload,
                                 productRequest,
-                                Methods.CAPTURE);
+                                method);
 
                 return responseEntity;
 

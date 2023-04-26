@@ -7,7 +7,6 @@ import com.flw.moka.entity.models.Transaction;
 import com.flw.moka.entity.request.ProductRequest;
 import com.flw.moka.entity.response.Meta;
 import com.flw.moka.entity.response.ProxyResponse;
-import com.flw.moka.exception.InvalidMethodNamePassedException;
 import com.flw.moka.exception.TransactionMethodAlreadyDoneException;
 import com.flw.moka.exception.TransactionNotCapturedException;
 import com.flw.moka.exception.TransactionNotFoundException;
@@ -23,15 +22,11 @@ public class MethodValidator {
 
     ProxyResponseService proxyResponseService;
 
-    public void preventVoidOrRefundIfNotCaptured(String method, Transaction transaction)
+    public void preventVoidOrRefundIfNotCaptured(Transaction transaction)
             throws TransactionNotCapturedException {
 
         if (transaction.getTimeCaptured() == null || transaction.getTimeCaptured().isEmpty()) {
-            throw new TransactionNotCapturedException("Can't " + method + " a transaction that is not captured");
-        }
-        if (method == null || method.isEmpty()) {
-            throw new InvalidMethodNamePassedException(
-                    "Please provide a method in your void/refund service to use this utility");
+            throw new TransactionNotCapturedException("Please capture transaction before Void/Refund");
         }
     }
 

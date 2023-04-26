@@ -63,8 +63,9 @@ public class RefundsUtil {
         refundsEntityService.saveRefund(refund);
     }
 
-    public Refunds checkIfRefundExistInDB(ProductRequest productRequest, String method) {
+    public Refunds checkIfRefundExistInDB(ProductRequest productRequest) {
 
+        String method = Methods.REFUND;
         String refundReference = productRequest.getTransactionReference();
 
         Optional<Refunds> optionalRefund = refundsEntityService

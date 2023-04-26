@@ -11,10 +11,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.flw.moka.controller.custom_router.VoidRefundRouter;
 import com.flw.moka.entity.constants.Methods;
+import com.flw.moka.entity.models.Transaction;
 import com.flw.moka.entity.request.ProductRequest;
-import com.flw.moka.entity.request.ProviderPayload;
 import com.flw.moka.entity.response.ProxyResponse;
-import com.flw.moka.service.helper_service.ProviderPayloadService;
+import com.flw.moka.service.entity_service.TransactionService;
+import com.flw.moka.utilities.helpers.TimeUtil;
+import com.flw.moka.validation.MethodValidator;
 
 import lombok.AllArgsConstructor;
 
@@ -22,16 +24,24 @@ import lombok.AllArgsConstructor;
 @RestController
 @RequestMapping("/moka")
 public class RefundController {
-        ProviderPayloadService providerPayloadService;
-        VoidRefundRouter voidRefundRouterUtil;
+    
+        TransactionService transactionService;
+        VoidRefundRouter voidRefundRouter;
+        MethodValidator methodValidator;
 
-        @PostMapping(path = "/refund", consumes = "application/json", produces = "application/json")
-        public ResponseEntity<ProxyResponse> saveCardParams(@RequestBody ProductRequest productRequest)
-                        throws URISyntaxException, ParseException {
+    @PostMapping(path = "/refund", consumes = "application/json", produces = "application/json")
+    public ResponseEntity<ProxyResponse> saveCardParams(@RequestBody ProductRequest productRequest)
+        throws URISyntaxException, ParseException {
 
-                ProviderPayload newProviderPayload = providerPayloadService
-                        .createNewProviderPayload(productRequest, Methods.REFUND);
+        Transaction transaction = transactionService.getTransaction(productRequest, Methods.REFUND);
 
-                return voidRefundRouterUtil.route(productRequest, newProviderPayload);
-        }
+        methodValidator.preventVoidOrRefundIfNotCaptured(transaction);
+
+        String transactionTimeCaptured = transaction.getTimeCaptured();
+
+        TimeUtil timeUtility = new TimeUtil();
+        Boolean isTransactionUpTo24Hours = timeUtility.isTransactionUpTo24Hours(transactionTimeCaptured);
+
+        return voidRefundRouter.route(productRequest, isTransactionUpTo24Hours, transaction);
+    }
 }

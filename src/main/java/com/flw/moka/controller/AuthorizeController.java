@@ -32,6 +32,8 @@ public class AuthorizeController {
         public ResponseEntity<ProxyResponse> saveCardParams(@Valid @RequestBody ProductRequest productRequest,
                         BindingResult bindingResult) throws Exception {
 
+                String method = Methods.AUTHORIZE;
+
                 if (bindingResult.hasErrors()) {
                         throw new InvalidProductRequestException(bindingResult);
                 }
@@ -39,10 +41,10 @@ public class AuthorizeController {
                 productRequest.setTransactionReference(generateReferenceUtil.generateRandom("MRN"));
 
                 ProviderPayload newProviderPayload = providerPayloadService
-                        .createNewProviderPayload(productRequest, Methods.AUTHORIZE);
+                        .createNewProviderPayload(productRequest, method);
 
                 ResponseEntity<ProxyResponse> responseEntity = authService.sendProviderPayload(
-                                newProviderPayload, productRequest);
+                                newProviderPayload, productRequest, method);
 
                 return responseEntity;
 
