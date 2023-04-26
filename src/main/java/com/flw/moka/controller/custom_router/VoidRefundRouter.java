@@ -12,8 +12,8 @@ import com.flw.moka.entity.request.ProviderPayload;
 import com.flw.moka.entity.response.ProxyResponse;
 import com.flw.moka.service.controller_service.RefundService;
 import com.flw.moka.service.controller_service.VoidService;
+import com.flw.moka.service.entity_service.TransactionService;
 import com.flw.moka.utilities.helpers.TimeUtil;
-import com.flw.moka.utilities.helpers.TransactionUtil;
 import com.flw.moka.validation.MethodValidator;
 
 import lombok.AllArgsConstructor;
@@ -22,7 +22,7 @@ import lombok.AllArgsConstructor;
 @Component
 public class VoidRefundRouter {
 
-    TransactionUtil transactionUtil;
+    TransactionService transactionService;
     VoidService voidService;
     RefundService refundService;
     MethodValidator methodValidator;
@@ -38,9 +38,9 @@ public class VoidRefundRouter {
             method = Methods.REFUND;
         }
 
-        Transaction transaction = transactionUtil.getTransactionIfExistInDB(productRequest, method);
+        Transaction transaction = transactionService.getTransaction(productRequest, method);
 
-        methodValidator.preventVoidOrRefundIfNotCaptured(Methods.REFUND, transaction);
+        methodValidator.preventVoidOrRefundIfNotCaptured(method, transaction);
 
         String transactionTimeCaptured = transaction.getTimeCaptured();
 

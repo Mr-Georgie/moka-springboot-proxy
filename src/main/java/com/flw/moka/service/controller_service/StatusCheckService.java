@@ -45,7 +45,7 @@ public class StatusCheckService {
             ProductRequest productRequest) {
         StatusCheck statusCheck = new StatusCheck();
 
-        Optional<Refunds> findRefund = refundsService.getRefundByRefundReference(reference);
+        Optional<Refunds> findRefund = refundsService.findLastTransactionOccurrence(reference);
 
         if ((findRefund.isPresent() && !findRefund.get().getResponseCode().equalsIgnoreCase("03"))) {
 
@@ -55,26 +55,27 @@ public class StatusCheckService {
             logStatusCheck(providerStatusCheck);
             return setStatusCheckResponseMeta(providerStatusCheck, "is-provider-detail");
 
-            // return providerStatusCheck;
-
         } else if ((findRefund.isPresent() && findRefund.get().getResponseCode().equalsIgnoreCase("03"))) {
             Refunds refund = findRefund.get();
             String status = "REFUNDED";
-            statusCheck.setRefundDetail(refund);
+            statusCheck.setRefund(refund);
             statusCheck.setStatusMessage(status);
 
             logStatusCheck(statusCheck);
             return setStatusCheckResponseMeta(statusCheck, "is-refund-detail");
 
         } else {
-            Optional<Transaction> findTransaction = transactionService.getTransaction(reference);
+            // To allow status check work for references not present in database
+            Optional<Transaction> findTransaction = transactionService.getTransactionIfExistInDB(reference);
 
-            if (findTransaction.isPresent() && !findTransaction.get().getResponseCode().equalsIgnoreCase("RR")) {
+            String responseCode = findTransaction.get().getResponseCode();
+
+            if (findTransaction.isPresent() && !responseCode.equalsIgnoreCase("RR")) {
                 Transaction transaction = findTransaction.get();
                 String status = transaction.getTransactionStatus();
-                statusCheck.setTransactionDetail(transaction);
+                statusCheck.setTransaction(transaction);
                 statusCheck.setStatusMessage(
-                        status.equalsIgnoreCase("Void") ? "VOIDED" : status + "D");
+                        status.equalsIgnoreCase(Methods.VOID) ? "VOIDED" : status + "D");
 
                 logStatusCheck(statusCheck);
                 return setStatusCheckResponseMeta(statusCheck, "is-transaction-detail");
@@ -84,12 +85,9 @@ public class StatusCheckService {
                 logStatusCheck(providerStatusCheck);
 
                 return setStatusCheckResponseMeta(providerStatusCheck, "is-provider-detail");
-                // return providerStatusCheck;
             }
         }
 
-        // logStatusCheck(statusCheck);
-        // return statusCheck;
     }
 
     public StatusCheck getStatusFromProvider(ProviderPayload providerPayload, ProductRequest productRequest) {
@@ -117,33 +115,33 @@ public class StatusCheckService {
         int paymentStatus = paymentDetail.getPaymentStatus();
         int transactionStatus = paymentDetail.getTrxStatus();
 
-        Boolean awaitingPaymentConfirmation = (paymentStatus == 0 && transactionStatus == 0);
-        Boolean preProvisionSuccessful = (paymentStatus == 1 && transactionStatus == 1);
-        Boolean preProvisionFailed = (paymentStatus == 1 && transactionStatus == 2);
-        Boolean paymentSuccessful = (paymentStatus == 2 && transactionStatus == 1);
-        Boolean paymentFailed = (paymentStatus == 2 && transactionStatus == 2);
-        Boolean cancellationSuccessful = (paymentStatus == 3 && transactionStatus == 1);
-        Boolean refundSuccessful = (paymentStatus == 4 && transactionStatus == 1);
+        Boolean isAwaitingPaymentConfirmation = (paymentStatus == 0 && transactionStatus == 0);
+        Boolean isPreProvisionSuccessful = (paymentStatus == 1 && transactionStatus == 1);
+        Boolean isPreProvisionFailed = (paymentStatus == 1 && transactionStatus == 2);
+        Boolean isPaymentSuccessful = (paymentStatus == 2 && transactionStatus == 1);
+        Boolean isPaymentFailed = (paymentStatus == 2 && transactionStatus == 2);
+        Boolean isCancellationSuccessful = (paymentStatus == 3 && transactionStatus == 1);
+        Boolean isRefundSuccessful = (paymentStatus == 4 && transactionStatus == 1);
 
-        if (awaitingPaymentConfirmation) {
+        if (isAwaitingPaymentConfirmation) {
             statusCheck.setStatusMessage("Payment Authorization Pending");
-        } else if (preProvisionSuccessful) {
+        } else if (isPreProvisionSuccessful) {
             statusCheck.setStatusMessage("Authorize Successful");
-        } else if (preProvisionFailed) {
+        } else if (isPreProvisionFailed) {
             statusCheck.setStatusMessage("Authorize Failed");
-        } else if (paymentSuccessful) {
+        } else if (isPaymentSuccessful) {
             statusCheck.setStatusMessage("Payment Successful");
-        } else if (paymentFailed) {
+        } else if (isPaymentFailed) {
             statusCheck.setStatusMessage("Payment Failed");
-        } else if (cancellationSuccessful) {
+        } else if (isCancellationSuccessful) {
             statusCheck.setStatusMessage("Void Successful");
-        } else if (refundSuccessful) {
+        } else if (isRefundSuccessful) {
             statusCheck.setStatusMessage("Refund Successful");
         } else {
             statusCheck.setStatusMessage("Invalid Payment Status");
         }
 
-        statusCheck.setProviderResponse(paymentDetail);
+        statusCheck.setPaymentDetail(paymentDetail);
 
         return statusCheck;
     }
@@ -153,12 +151,12 @@ public class StatusCheckService {
         Logs log = new Logs();
         Gson gson = new Gson();
 
-        String jsonstatusCheck = gson.toJson(statusCheck);
+        String jsonStatusCheck = gson.toJson(statusCheck);
 
         log.setExternalReference("N/A");
         log.setBody("Status check");
         log.setMethod("status");
-        log.setResponse(jsonstatusCheck);
+        log.setResponse(jsonStatusCheck);
         log.setTransactionReference("N/A");
         log.setTimeIn(timeUtility.getDateTime());
 
@@ -169,46 +167,50 @@ public class StatusCheckService {
         StatusCheckResponse statusCheckResponse = new StatusCheckResponse();
         StatusMeta statusMeta = new StatusMeta();
 
-        if (detailInfo.equalsIgnoreCase("is-provider-detail")) {
-            statusMeta.setAmount(Long.valueOf(statusCheck.getProviderResponse().getAmount()));
-            statusMeta.setCardholderName(statusCheck.getProviderResponse().getCardHolderFullName());
-            statusMeta.setCurrency(statusCheck.getProviderResponse().getCurrencyCode());
-            statusMeta.setMask(null);
-            statusMeta.setPaymentDate(statusCheck.getProviderResponse().getPaymentDate());
-            statusMeta.setRefundedAmount(Long.valueOf(statusCheck.getProviderResponse().getRefAmount()));
-            statusMeta.setTransactionReference(statusCheck.getProviderResponse().getOtherTrxCode());
-
-            statusCheckResponse.setStatusMessage(statusCheck.getStatusMessage());
-            statusCheckResponse.setStatusMeta(statusMeta);
-
-        } else if (detailInfo.equalsIgnoreCase("is-refund-detail")) {
-            statusMeta.setAmount(statusCheck.getRefundDetail().getRefundedAmount());
-            statusMeta.setCardholderName("");
-            statusMeta.setCurrency(statusCheck.getRefundDetail().getCurrency());
-            statusMeta.setMask(statusCheck.getRefundDetail().getMask());
-            statusMeta.setPaymentDate(statusCheck.getRefundDetail().getTimeRefunded());
-            statusMeta.setRefundedAmount(statusCheck.getRefundDetail().getRefundedAmount());
-            statusMeta.setTransactionReference(statusCheck.getRefundDetail().getTransactionReference());
-
-            statusCheckResponse.setStatusMessage(statusCheck.getStatusMessage());
-            statusCheckResponse.setStatusMeta(statusMeta);
-
-        } else if (detailInfo.equalsIgnoreCase("is-transaction-detail")) {
-            statusMeta.setAmount(statusCheck.getTransactionDetail().getAmount());
-            statusMeta.setCardholderName("");
-            statusMeta.setCurrency(statusCheck.getTransactionDetail().getCurrency());
-            statusMeta.setMask(statusCheck.getTransactionDetail().getMask());
-            statusMeta.setPaymentDate(statusCheck.getTransactionDetail().getTimeIn());
-            statusMeta.setRefundedAmount(null);
-            statusMeta.setTransactionReference(statusCheck.getTransactionDetail().getTransactionReference());
-
-            statusCheckResponse.setStatusMessage(statusCheck.getStatusMessage());
-            statusCheckResponse.setStatusMeta(statusMeta);
-
+        switch (detailInfo.toLowerCase()) {
+            case "is-provider-detail":
+                PaymentDetail paymentDetail = statusCheck.getPaymentDetail();
+                statusMeta.setAmount(Long.valueOf(paymentDetail.getAmount()));
+                statusMeta.setCardholderName(paymentDetail.getCardHolderFullName());
+                statusMeta.setCurrency(paymentDetail.getCurrencyCode());
+                statusMeta.setPaymentDate(paymentDetail.getPaymentDate());
+                statusMeta.setRefundedAmount(Long.valueOf(paymentDetail.getRefAmount()));
+                statusMeta.setTransactionReference(paymentDetail.getOtherTrxCode());
+                break;
+            case "is-refund-detail":
+                Refunds refundDetail = statusCheck.getRefund();
+                statusMeta.setAmount(refundDetail.getBalance());
+                statusMeta.setCardholderName("");
+                statusMeta.setCurrency(refundDetail.getCurrency());
+                statusMeta.setMask(refundDetail.getMask());
+                statusMeta.setPaymentDate(refundDetail.getTimeRefunded());
+                statusMeta.setRefundedAmount(refundDetail.getRefundedAmount());
+                statusMeta.setTransactionReference(refundDetail.getTransactionReference());
+                break;
+            case "is-transaction-detail":
+                Transaction transactionDetail = statusCheck.getTransaction();
+                if (statusCheck.getStatusMessage().equalsIgnoreCase("VOIDED")) {
+                    statusMeta.setAmount(Long.valueOf(0));
+                    statusMeta.setRefundedAmount(transactionDetail.getAmount());
+                } else {
+                    statusMeta.setAmount(transactionDetail.getAmount());
+                }
+                statusMeta.setCardholderName("");
+                statusMeta.setCurrency(transactionDetail.getCurrency());
+                statusMeta.setMask(transactionDetail.getMask());
+                statusMeta.setPaymentDate(transactionDetail.getTimeIn());
+                statusMeta.setTransactionReference(transactionDetail.getTransactionReference());
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid detailInfo value: " + detailInfo);
         }
 
+        statusCheckResponse.setStatusMessage(statusCheck.getStatusMessage());
+        statusCheckResponse.setStatusMeta(statusMeta);
         return statusCheckResponse;
-
     }
+
+    // Optional<Transaction> findTransaction = Optional.ofNullable(transactionService
+    //         .getTransaction(productRequest, Methods.STATUS));
 
 }

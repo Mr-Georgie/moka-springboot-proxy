@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import com.flw.moka.entity.constants.Methods;
 import com.flw.moka.entity.request.PaymentDealerRequest;
 import com.flw.moka.entity.request.ProductRequest;
-import com.flw.moka.exception.NoMethodNamePassedException;
+import com.flw.moka.exception.InvalidMethodNamePassedException;
 import com.flw.moka.utilities.request.PaymentDealerRequestUtil;
 
 import lombok.AllArgsConstructor;
@@ -20,18 +20,24 @@ public class PaymentDealerRequestServiceImpl implements PaymentDealerRequestServ
     @Override
     public PaymentDealerRequest createRequestPayload(ProductRequest productRequest, String method) {
 
-        if (method.equalsIgnoreCase(Methods.AUTHORIZE)) {
-            requestPayload = saveAuthPayload(productRequest);
-        } else if (method.equalsIgnoreCase(Methods.CAPTURE)) {
-            requestPayload = saveCapturePayload(productRequest);
-        } else if (method.equalsIgnoreCase(Methods.VOID)) {
-            requestPayload = saveVoidPayload(productRequest);
-        } else if (method.equalsIgnoreCase(Methods.REFUND)) {
-            requestPayload = saveRefundPayload(productRequest);
-        } else if (method.equalsIgnoreCase(Methods.STATUS)) {
-            requestPayload = saveStatusPayload(productRequest);
-        } else {
-            throw new NoMethodNamePassedException("Please provide method in service when using this service");
+        switch (method) {
+            case Methods.AUTHORIZE:
+                requestPayload = saveAuthPayload(productRequest);
+                break;
+            case Methods.CAPTURE:
+                requestPayload = saveCapturePayload(productRequest);
+                break;
+            case Methods.VOID:
+                requestPayload = saveVoidPayload(productRequest);
+                break;
+            case Methods.REFUND:
+                requestPayload = saveRefundPayload(productRequest);
+                break;
+            case Methods.STATUS:
+                requestPayload = saveStatusPayload(productRequest);
+                break;
+            default:
+                throw new InvalidMethodNamePassedException("Please provide a method name when using this service");
         }
 
         return requestPayload;

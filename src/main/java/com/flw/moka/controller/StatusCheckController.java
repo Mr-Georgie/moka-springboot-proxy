@@ -8,12 +8,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.flw.moka.entity.constants.Methods;
-import com.flw.moka.entity.request.PaymentDealerRequest;
 import com.flw.moka.entity.request.ProductRequest;
 import com.flw.moka.entity.request.ProviderPayload;
 import com.flw.moka.entity.response.StatusCheckResponse;
 import com.flw.moka.service.controller_service.StatusCheckService;
-import com.flw.moka.service.helper_service.PaymentDealerRequestService;
 import com.flw.moka.service.helper_service.ProviderPayloadService;
 
 import lombok.AllArgsConstructor;
@@ -23,26 +21,23 @@ import lombok.AllArgsConstructor;
 @RequestMapping("/moka")
 public class StatusCheckController {
 
-        ProviderPayloadService providerPayloadService;
-        PaymentDealerRequestService paymentDealerRequestService;
-        StatusCheckService statusCheckService;
+    ProviderPayloadService providerPayloadService;
+    StatusCheckService statusCheckService;
 
-        @GetMapping("/status-check/{reference}")
-        public ResponseEntity<StatusCheckResponse> getContact(@PathVariable String reference) {
+    @GetMapping("/status-check/{reference}")
+    public ResponseEntity<StatusCheckResponse> getContact(@PathVariable String reference) {
 
-                ProductRequest productRequest = new ProductRequest();
+        ProductRequest productRequest = new ProductRequest();
 
-                productRequest.setTransactionReference(reference);
+        productRequest.setTransactionReference(reference);
 
-                PaymentDealerRequest newPaymentDealerRequest = paymentDealerRequestService.createRequestPayload(
-                                productRequest, Methods.AUTHORIZE);
+        ProviderPayload newProviderPayload = providerPayloadService
+                        .createNewProviderPayload(productRequest, Methods.STATUS);
 
-                ProviderPayload newProviderPayload = providerPayloadService
-                                .savePaymentDealerAuthAndReq(newPaymentDealerRequest);
-
-                StatusCheckResponse status = statusCheckService.check(reference,
+        StatusCheckResponse status = statusCheckService.check(reference,
                                 newProviderPayload, productRequest);
 
-                return ResponseEntity.status(HttpStatus.OK).body(status);
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(status);
+        
+    }
 }

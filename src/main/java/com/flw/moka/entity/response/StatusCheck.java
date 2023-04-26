@@ -14,7 +14,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class StatusCheck {
     private String statusMessage;
-    private Transaction transactionDetail;
-    private Refunds refundDetail;
-    private PaymentDetail providerResponse;
+    private Transaction transaction;
+    private Refunds refund;
+    private PaymentDetail paymentDetail;
 }

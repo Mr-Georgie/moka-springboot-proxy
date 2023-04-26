@@ -8,13 +8,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.flw.moka.entity.constants.Methods;
-import com.flw.moka.entity.request.PaymentDealerRequest;
 import com.flw.moka.entity.request.ProductRequest;
 import com.flw.moka.entity.request.ProviderPayload;
 import com.flw.moka.entity.response.ProxyResponse;
 import com.flw.moka.exception.InvalidProductRequestException;
 import com.flw.moka.service.controller_service.AuthorizeService;
-import com.flw.moka.service.helper_service.PaymentDealerRequestService;
 import com.flw.moka.service.helper_service.ProviderPayloadService;
 import com.flw.moka.utilities.helpers.GenerateReferenceUtil;
 
@@ -27,7 +25,6 @@ import lombok.AllArgsConstructor;
 public class AuthorizeController {
 
         ProviderPayloadService providerPayloadService;
-        PaymentDealerRequestService paymentDealerRequestService;
         AuthorizeService authService;
         GenerateReferenceUtil generateReferenceUtil;
 
@@ -41,11 +38,8 @@ public class AuthorizeController {
 
                 productRequest.setTransactionReference(generateReferenceUtil.generateRandom("MRN"));
 
-                PaymentDealerRequest newPaymentDealerRequest = paymentDealerRequestService.createRequestPayload(
-                                productRequest, Methods.AUTHORIZE);
-
                 ProviderPayload newProviderPayload = providerPayloadService
-                                .savePaymentDealerAuthAndReq(newPaymentDealerRequest);
+                        .createNewProviderPayload(productRequest, Methods.AUTHORIZE);
 
                 ResponseEntity<ProxyResponse> responseEntity = authService.sendProviderPayload(
                                 newProviderPayload, productRequest);

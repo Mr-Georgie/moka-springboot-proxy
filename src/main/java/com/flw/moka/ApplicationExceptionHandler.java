@@ -9,8 +9,8 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import com.flw.moka.entity.response.Meta;
 import com.flw.moka.entity.response.ProxyResponse;
 import com.flw.moka.exception.BadCredentialsException;
+import com.flw.moka.exception.InvalidMethodNamePassedException;
 import com.flw.moka.exception.InvalidProductRequestException;
-import com.flw.moka.exception.NoMethodNamePassedException;
 import com.flw.moka.exception.TransactionMethodAlreadyDoneException;
 import com.flw.moka.exception.TransactionNotCapturedException;
 import com.flw.moka.exception.TransactionNotFoundException;
@@ -67,8 +67,8 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
         return new ResponseEntity<>(proxyResponse, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(NoMethodNamePassedException.class)
-    protected ResponseEntity<Object> handleNoMethodPassedException(NoMethodNamePassedException ex) {
+    @ExceptionHandler(InvalidMethodNamePassedException.class)
+    protected ResponseEntity<Object> handleNoMethodPassedException(InvalidMethodNamePassedException ex) {
         ProxyResponse proxyResponse = responseCreator();
         proxyResponse.setResponseMessage(ex.getMessage());
         return new ResponseEntity<>(proxyResponse, HttpStatus.BAD_REQUEST);

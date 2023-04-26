@@ -71,21 +71,20 @@ public class RefundsUtil {
             .findLastTransactionOccurrence(refundReference);
 
         if (optionalRefund.isPresent()) {
-            Refunds foundRefund = optionalRefund.get();
-            String responseCode = foundRefund.getResponseCode();
+            Refunds refund = optionalRefund.get();
+            String responseCode = refund.getResponseCode();
             
             if (!responseCode.equals("RR")) {
 
-                if (foundRefund.getBalance() == 0) {
+                if (refund.getBalance() == 0) {
                     String message = "This has been refunded";
                     ProxyResponse proxyResponse = prepareResponseIfSuccessfulRefundsExist(refundReference, method, message);
                     logsUtil.setLogs(proxyResponse, productRequest, method);
-                    saveRefundToDataBase(proxyResponse, foundRefund, null);
+                    saveRefundToDataBase(proxyResponse, refund, null);
                     throw new TransactionMethodAlreadyDoneException(message);
                 }
-                
+                return computeRefundedAmount(refund, productRequest);
             }
-            return computeRefundedAmount(foundRefund, productRequest);
         }
 
         Refunds refund = new Refunds();
@@ -119,17 +118,9 @@ public class RefundsUtil {
                 }
 
                 return newRefund;
-            } else {
-                newRefund.setRefundedAmount(Long.valueOf(0));
-
-                if (refund.getBalance() == null) {
-                    newRefund.setBalance(transaction.getAmount());
-                } else {
-                    newRefund.setBalance(refund.getBalance());
-                }
             }
 
-            
+            newRefund.setBalance(transaction.getAmount());
         } else {
             newRefund.setRefundedAmount(refund.getRefundedAmount());
             newRefund.setBalance(refund.getBalance());
@@ -150,7 +141,7 @@ public class RefundsUtil {
             return refund;
         }
 
-        if(requestedAmount > refund.getBalance()) {
+        if(totalAmountRefundable < requestedAmount) {
             String message = "REFUND Failed: Invalid Amount " + requestedAmount;
             ProxyResponse proxyResponse = prepareResponseIfSuccessfulRefundsExist(refund.getTransactionReference(), Methods.REFUND, message);
             logsUtil.setLogs(proxyResponse, productRequest, Methods.REFUND);

@@ -72,7 +72,7 @@ public class AuthorizeService {
                 logsUtil.setLogs(proxyResponse, productRequest, Methods.AUTHORIZE);
 
                 Transaction transaction = new Transaction();
-                transactionUtil.saveTransactionToDatabase(productRequest, proxyResponse, transaction,
+                transactionService.saveTransaction(productRequest, proxyResponse, transaction,
                                 Methods.AUTHORIZE);
                 return;
         }

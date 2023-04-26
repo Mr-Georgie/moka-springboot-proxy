@@ -16,10 +16,10 @@ import com.flw.moka.entity.request.ProviderPayload;
 import com.flw.moka.entity.response.ProviderResponse;
 import com.flw.moka.entity.response.ProviderResponseData;
 import com.flw.moka.entity.response.ProxyResponse;
+import com.flw.moka.service.entity_service.TransactionService;
 import com.flw.moka.service.helper_service.ProxyResponseService;
 import com.flw.moka.utilities.helpers.LogsUtil;
 import com.flw.moka.utilities.helpers.ProviderApiUtil;
-import com.flw.moka.utilities.helpers.TransactionUtil;
 import com.flw.moka.validation.MethodValidator;
 
 import lombok.AllArgsConstructor;
@@ -28,7 +28,7 @@ import lombok.AllArgsConstructor;
 @Service
 public class VoidService {
 	private Environment environment;
-	TransactionUtil transactionUtil;
+	TransactionService transactionService;
 	ProxyResponseService proxyResponseService;
 	ProviderApiUtil providerApiUtil;
 	LogsUtil logsUtil;
@@ -40,7 +40,7 @@ public class VoidService {
 			throws ParseException {
 
 		methodValidator
-				.preventDuplicateMethodCall(transaction, Methods.VOID, productRequest, logsUtil, transactionUtil);
+				.preventDuplicateMethodCall(transaction, Methods.VOID, productRequest, logsUtil, transactionService);
 
 		String voidEndpoint = environment.getProperty("provider.endpoints.void");
 		URI endpointURI = URI.create(voidEndpoint);
@@ -65,7 +65,7 @@ public class VoidService {
 			Transaction transaction) {
 		logsUtil.setLogs(proxyResponse, productRequest, Methods.VOID);
 
-		transactionUtil.saveTransactionToDatabase(productRequest, proxyResponse, transaction, Methods.VOID);
+		transactionService.saveTransaction(productRequest, proxyResponse, transaction, Methods.VOID);
 		return;
 	}
 
