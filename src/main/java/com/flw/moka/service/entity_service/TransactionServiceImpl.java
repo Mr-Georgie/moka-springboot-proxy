@@ -13,10 +13,9 @@ import com.flw.moka.exception.InvalidMethodNamePassedException;
 import com.flw.moka.exception.TransactionNotFoundException;
 import com.flw.moka.repository.TransactionRepository;
 import com.flw.moka.service.helper_service.ProxyResponseService;
-import com.flw.moka.utilities.helpers.LogsUtil;
-import com.flw.moka.utilities.helpers.RefundsUtil;
+import com.flw.moka.utilities.entity.LogsUtil;
+import com.flw.moka.utilities.entity.TransactionUtil;
 import com.flw.moka.utilities.helpers.TimeUtil;
-import com.flw.moka.utilities.helpers.TransactionUtil;
 import com.flw.moka.validation.MethodValidator;
 
 import lombok.AllArgsConstructor;
@@ -29,7 +28,7 @@ public class TransactionServiceImpl implements TransactionService {
     ProxyResponseService proxyResponseService;
     MethodValidator methodValidator;
     LogsUtil logsUtil;
-    RefundsUtil refundsUtil;
+    RefundsEntityService refundsEntityService;
     TransactionUtil transactionUtill;
 
     @Override
@@ -78,7 +77,7 @@ public class TransactionServiceImpl implements TransactionService {
             Transaction nonExistingTransaction = transactionUtill.prepareNonExistingTransaction(productRequest, timeUtility);
             if (method.equalsIgnoreCase(Methods.REFUND)) {
                 Refunds newRefund = new Refunds();
-                refundsUtil.saveRefundToDataBase(proxyResponse, newRefund, nonExistingTransaction);
+                refundsEntityService.saveRefund(proxyResponse, newRefund, nonExistingTransaction);
             } else {
                 saveTransaction(productRequest, proxyResponse, nonExistingTransaction, method);
             }

@@ -12,7 +12,7 @@ import com.flw.moka.exception.TransactionNotCapturedException;
 import com.flw.moka.exception.TransactionNotFoundException;
 import com.flw.moka.service.entity_service.TransactionService;
 import com.flw.moka.service.helper_service.ProxyResponseService;
-import com.flw.moka.utilities.helpers.LogsUtil;
+import com.flw.moka.utilities.entity.LogsUtil;
 
 import lombok.AllArgsConstructor;
 

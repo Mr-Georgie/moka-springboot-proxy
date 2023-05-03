@@ -25,9 +25,9 @@ import lombok.AllArgsConstructor;
 @RequestMapping("/moka")
 public class RefundController {
     
-        TransactionService transactionService;
-        VoidRefundRouter voidRefundRouter;
-        MethodValidator methodValidator;
+    TransactionService transactionService;
+    VoidRefundRouter voidRefundRouter;
+    MethodValidator methodValidator;
 
     @PostMapping(path = "/refund", consumes = "application/json", produces = "application/json")
     public ResponseEntity<ProxyResponse> saveCardParams(@RequestBody ProductRequest productRequest)

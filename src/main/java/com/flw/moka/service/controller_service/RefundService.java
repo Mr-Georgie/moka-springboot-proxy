@@ -12,9 +12,9 @@ import com.flw.moka.entity.models.Transaction;
 import com.flw.moka.entity.request.ProductRequest;
 import com.flw.moka.entity.request.ProviderPayload;
 import com.flw.moka.entity.response.ProxyResponse;
-import com.flw.moka.utilities.helpers.LogsUtil;
+import com.flw.moka.service.entity_service.RefundsEntityService;
+import com.flw.moka.utilities.entity.LogsUtil;
 import com.flw.moka.utilities.helpers.ProviderApiUtil;
-import com.flw.moka.utilities.helpers.RefundsUtil;
 import com.flw.moka.validation.MethodValidator;
 
 import lombok.AllArgsConstructor;
@@ -23,7 +23,7 @@ import lombok.AllArgsConstructor;
 @Service
 public class RefundService {
 
-	RefundsUtil refundsUtil;
+	RefundsEntityService refundsEntityService;
 	ProviderApiUtil providerApiUtil;
 	LogsUtil logsUtil;
 	MethodValidator methodValidator;
@@ -32,7 +32,7 @@ public class RefundService {
 			ProductRequest productRequest, Transaction transaction, String method)
 			throws ParseException {
 
-		Refunds refund = refundsUtil.checkIfRefundExistInDB(productRequest);
+		Refunds refund = refundsEntityService.getRefund(productRequest, transaction);
 
 		methodValidator
 				.preventDuplicateMethodCall(transaction, method, productRequest, logsUtil, null);
@@ -51,6 +51,6 @@ public class RefundService {
 
 		logsUtil.setLogs(proxyResponse, productRequest, Methods.REFUND);
 
-		refundsUtil.saveRefundToDataBase(proxyResponse, refund, transaction);
+		refundsEntityService.saveRefund(proxyResponse, refund, transaction);
 	}
 }

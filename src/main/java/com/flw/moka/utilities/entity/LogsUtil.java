@@ -1,4 +1,4 @@
-package com.flw.moka.utilities.helpers;
+package com.flw.moka.utilities.entity;
 
 import org.springframework.stereotype.Component;
 
@@ -6,6 +6,7 @@ import com.flw.moka.entity.models.Logs;
 import com.flw.moka.entity.request.ProductRequest;
 import com.flw.moka.entity.response.ProxyResponse;
 import com.flw.moka.service.entity_service.LogsService;
+import com.flw.moka.utilities.helpers.TimeUtil;
 import com.google.gson.Gson;
 
 import lombok.AllArgsConstructor;

@@ -12,7 +12,7 @@ import com.flw.moka.entity.request.ProductRequest;
 import com.flw.moka.entity.request.ProviderPayload;
 import com.flw.moka.entity.response.ProxyResponse;
 import com.flw.moka.service.entity_service.TransactionService;
-import com.flw.moka.utilities.helpers.LogsUtil;
+import com.flw.moka.utilities.entity.LogsUtil;
 import com.flw.moka.utilities.helpers.ProviderApiUtil;
 import com.flw.moka.validation.MethodValidator;
 

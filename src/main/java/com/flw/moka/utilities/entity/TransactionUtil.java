@@ -1,4 +1,4 @@
-package com.flw.moka.utilities.helpers;
+package com.flw.moka.utilities.entity;
 
 import org.springframework.stereotype.Component;
 
@@ -7,6 +7,7 @@ import com.flw.moka.entity.models.Transaction;
 import com.flw.moka.entity.request.ProductRequest;
 import com.flw.moka.entity.response.Meta;
 import com.flw.moka.entity.response.ProxyResponse;
+import com.flw.moka.utilities.helpers.TimeUtil;
 
 import lombok.AllArgsConstructor;
 
