@@ -18,7 +18,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 @Table(name = "refunds", indexes = {
+        @Index(name = "refundref_index", columnList = "refund_reference"),
         @Index(name = "transactionref_index", columnList = "transaction_reference"),
+        @Index(name = "payloadref_index", columnList = "payload_reference"),
         @Index(name = "timerefunded_index", columnList = "time_refunded"),
         @Index(name = "mask_index", columnList = "mask")
 })
@@ -32,6 +34,15 @@ public class Refunds {
     @Column(name = "transaction_reference", nullable = false)
     private String transactionReference;
 
+    @Column(name = "payload_reference", nullable = true)
+    private String payloadReference;
+
+    @Column(name = "refund_reference", nullable = true)
+    private String refundReference;
+
+    @Column(name = "refund_id", nullable = true)
+    private String refundId;
+
     @Column(name = "external_reference", nullable = true)
     private String externalReference;
 
@@ -44,8 +55,11 @@ public class Refunds {
     @Column(name = "provider", nullable = true)
     private String provider;
 
-    @Column(name = "amount", nullable = true)
-    private Long amount;
+    @Column(name = "balance", nullable = true)
+    private Long balance;
+
+    @Column(name = "refunded_amount", nullable = true)
+    private Long refundedAmount;
 
     @Column(name = "currency", nullable = true)
     private String currency;

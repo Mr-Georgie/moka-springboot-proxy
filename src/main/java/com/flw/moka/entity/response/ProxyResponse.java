@@ -1,5 +1,7 @@
 package com.flw.moka.entity.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,11 +13,18 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ProxyResponse {
 
-    private String message;
-    private String code;
-    private String transactionReference;
-    private String externalReference;
-    private String provider;
+    private String responseMessage;
+    private String responseCode;
+    private Meta meta;
+    @JsonIgnore
     private ProviderResponse providerResponse;
 
 }
+
+// private String message;
+// private String code;
+// private String transactionReference;
+// private String payloadReference;
+// private String externalReference;
+// private String provider;
+// private ProviderResponse providerResponse;

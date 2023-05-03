@@ -12,9 +12,4 @@ public interface ProxyResponseService {
                         Optional<ProviderResponse> bodyEntity,
                         ProductRequest productRequest, String method);
 
-        // void saveFailedResponseToDB(ProxyResponse proxyResponse,
-        // String transactionRef, String method);
-
-        // public void sendMethodAlreadyDoneResponse(String transactionCurrentStatus,
-        // String transactionRef);
 }

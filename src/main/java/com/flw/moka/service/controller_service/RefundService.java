@@ -1,10 +1,7 @@
 package com.flw.moka.service.controller_service;
 
-import java.net.URI;
 import java.text.ParseException;
-import java.util.Optional;
 
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -14,13 +11,10 @@ import com.flw.moka.entity.models.Refunds;
 import com.flw.moka.entity.models.Transaction;
 import com.flw.moka.entity.request.ProductRequest;
 import com.flw.moka.entity.request.ProviderPayload;
-import com.flw.moka.entity.response.ProviderResponse;
-import com.flw.moka.entity.response.ProviderResponseData;
 import com.flw.moka.entity.response.ProxyResponse;
-import com.flw.moka.service.helper_service.ProxyResponseService;
-import com.flw.moka.utilities.helpers.LogsUtil;
+import com.flw.moka.service.entity_service.RefundsEntityService;
+import com.flw.moka.utilities.entity.LogsUtil;
 import com.flw.moka.utilities.helpers.ProviderApiUtil;
-import com.flw.moka.utilities.helpers.RefundsUtil;
 import com.flw.moka.validation.MethodValidator;
 
 import lombok.AllArgsConstructor;
@@ -28,37 +22,24 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 @Service
 public class RefundService {
-	private Environment environment;
-	RefundsUtil refundsUtil;
-	ProxyResponseService proxyResponseService;
+
+	RefundsEntityService refundsEntityService;
 	ProviderApiUtil providerApiUtil;
 	LogsUtil logsUtil;
 	MethodValidator methodValidator;
 
 	public ResponseEntity<ProxyResponse> sendProviderPayload(ProviderPayload providerPayload,
-			ProductRequest productRequest, Transaction transaction)
+			ProductRequest productRequest, Transaction transaction, String method)
 			throws ParseException {
 
-		Refunds refund = refundsUtil.checkIfRefundExistInDB(productRequest, Methods.REFUND);
+		Refunds refund = refundsEntityService.getRefund(productRequest, transaction);
 
 		methodValidator
-				.preventDuplicateMethodCall(transaction, Methods.REFUND, productRequest, logsUtil, null, refund,
-						refundsUtil);
+				.preventDuplicateMethodCall(transaction, method, productRequest, logsUtil, null);
 
-		String refundEndpoint = environment.getProperty("provider.endpoints.refund");
-		URI endpointURI = URI.create(refundEndpoint);
-
-		ResponseEntity<ProviderResponse> responseEntity = providerApiUtil.makeProviderApiCall(
-				endpointURI,
-				providerPayload);
-
-		Optional<ProviderResponse> providerResponseBody = providerApiUtil.handleNoProviderResponse(responseEntity);
-		Optional<ProviderResponseData> providerResponseData = providerApiUtil
-				.unwrapProviderResponse(providerResponseBody);
-
-		ProxyResponse proxyResponse = proxyResponseService.createProxyResponse(providerResponseData,
-				providerResponseBody,
-				productRequest, Methods.REFUND);
+		ProxyResponse proxyResponse = providerApiUtil
+                                .apiCallHandler(method, providerPayload, productRequest);
+				
 
 		addEntitiesToDatabase(proxyResponse, productRequest, transaction, refund);
 
@@ -67,8 +48,9 @@ public class RefundService {
 
 	private void addEntitiesToDatabase(ProxyResponse proxyResponse, ProductRequest productRequest,
 			Transaction transaction, Refunds refund) {
+
 		logsUtil.setLogs(proxyResponse, productRequest, Methods.REFUND);
 
-		refundsUtil.saveRefundToDataBase(proxyResponse, refund, transaction);
+		refundsEntityService.saveRefund(proxyResponse, refund, transaction);
 	}
 }

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.flw.moka.entity.constants.Methods;
 import com.flw.moka.entity.request.ProductRequest;
+import com.flw.moka.entity.response.Meta;
 import com.flw.moka.entity.response.ProviderResponse;
 import com.flw.moka.entity.response.ProviderResponseData;
 import com.flw.moka.entity.response.ProxyResponse;
@@ -13,44 +14,50 @@ import com.flw.moka.entity.response.ProxyResponse;
 @Component
 public class ProxyResponseUtil {
     ProxyResponse proxyResponse = new ProxyResponse();
+    Meta meta = new Meta();
 
     public ProxyResponse setProxyResponse(Optional<ProviderResponseData> dataEntity,
             Optional<ProviderResponse> bodyEntity, ProductRequest productRequest, String method) {
 
         ProviderResponse providerResponse = bodyEntity.get();
 
+        meta.setTransactionReference(productRequest.getTransactionReference());
+        meta.setPayloadReference(productRequest.getPayloadReference());
+        meta.setProvider("MOKA");
+
         if (dataEntity.isPresent()) {
-            formatSuccessfulResponseBasedOnMethod(method);
-            proxyResponse.setTransactionReference(productRequest.getTransactionReference());
-            proxyResponse.setExternalReference(dataEntity.get().getVirtualPosOrderId());
+            formatSuccessfulResponseBasedOnMethod(method, dataEntity.get());
+            meta.setExternalReference(dataEntity.get().getVirtualPosOrderId());
+
+            proxyResponse.setMeta(meta);
             proxyResponse.setProviderResponse(providerResponse);
-            proxyResponse.setProvider("MOKA");
         } else {
 
             String exactProviderMessage = formatProviderResponseResultCode(providerResponse);
 
-            proxyResponse.setMessage(method.toUpperCase() + " Failed: " + exactProviderMessage);
-            proxyResponse.setCode("RR");
-            proxyResponse.setTransactionReference(productRequest.getTransactionReference());
-            proxyResponse.setProvider("MOKA");
+            proxyResponse.setResponseMessage(method.toUpperCase() + " Failed: " + exactProviderMessage);
+            proxyResponse.setResponseCode("RR");
+            proxyResponse.setMeta(meta);
             proxyResponse.setProviderResponse(providerResponse);
         }
         return proxyResponse;
     }
 
-    private ProxyResponse formatSuccessfulResponseBasedOnMethod(String method) {
+    private ProxyResponse formatSuccessfulResponseBasedOnMethod(String method, 
+            ProviderResponseData dataEntity) {
         if (method.equalsIgnoreCase(Methods.AUTHORIZE)) {
-            proxyResponse.setMessage("Pending Capture");
-            proxyResponse.setCode("02");
+            proxyResponse.setResponseMessage("Pending Capture");
+            proxyResponse.setResponseCode("02");
         } else if (method.equalsIgnoreCase(Methods.CAPTURE)) {
-            proxyResponse.setMessage("Capture Successful");
-            proxyResponse.setCode("00");
+            proxyResponse.setResponseMessage("Capture Successful");
+            proxyResponse.setResponseCode("00");
         } else if (method.equalsIgnoreCase(Methods.VOID)) {
-            proxyResponse.setMessage("Void Successful");
-            proxyResponse.setCode("01");
+            proxyResponse.setResponseMessage("Void Successful");
+            proxyResponse.setResponseCode("01");
         } else if (method.equalsIgnoreCase(Methods.REFUND)) {
-            proxyResponse.setMessage("Refund Successful");
-            proxyResponse.setCode("03");
+            proxyResponse.setResponseMessage("Refund Successful");
+            proxyResponse.setResponseCode("03");
+            meta.setRefundId(dataEntity.getRefundRequestId());
         }
 
         return proxyResponse;

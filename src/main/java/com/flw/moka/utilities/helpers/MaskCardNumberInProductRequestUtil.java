@@ -11,6 +11,7 @@ public class MaskCardNumberInProductRequestUtil {
         String maskedCardNumber = maskHandler(productRequest.getCardNumber());
 
         productRequest.setCardNumber(maskedCardNumber);
+        productRequest.setCvv("***");
         return productRequest;
     }
 

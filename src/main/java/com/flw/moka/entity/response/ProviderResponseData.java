@@ -24,6 +24,9 @@ public class ProviderResponseData {
     @JsonProperty("VirtualPosOrderId")
     private String virtualPosOrderId;
 
+    @JsonProperty("RefundRequestId")
+    private String refundRequestId;
+
     @JsonProperty("PaymentDetail")
     private PaymentDetail paymentDetail;
 }

@@ -22,9 +22,9 @@ public class ProductRequest {
     @NotBlank(message = "Card number cannot be blank")
     private String cardNumber;
 
-    @NotNull(message = "Transaction reference cannot be null")
-    @NotBlank(message = "Transaction reference cannot be blank")
-    private String transactionReference;
+    @NotNull(message = "Please provide your reference as payload reference")
+    @NotBlank(message = "Please provide your reference as payload reference")
+    private String payloadReference;
 
     @NotNull(message = "ExpiryMonth cannot be null")
     @NotBlank(message = "ExpiryMonth cannot be blank")
@@ -42,6 +42,7 @@ public class ProductRequest {
     @NotBlank(message = "CVV cannot be blank")
     private String cvv;
 
+    private String transactionReference;
     private String country;
     private String customerIp;
     private String externalReference;
