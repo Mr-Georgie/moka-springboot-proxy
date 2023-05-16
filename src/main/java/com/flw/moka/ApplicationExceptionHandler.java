@@ -18,6 +18,7 @@ import com.flw.moka.exception.TransactionNotFoundException;
 import com.flw.moka.exception.TransactionShouldBeRefundedException;
 import com.flw.moka.exception.TransactionShouldBeVoidedException;
 
+@SuppressWarnings("ALL")
 @ControllerAdvice
 public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler {
 

@@ -1,7 +1,5 @@
 package com.flw.moka.controller;
 
-import java.net.URISyntaxException;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,20 +24,17 @@ public class CaptureController {
         CaptureService captureService;
 
         @PostMapping(path = "/capture", consumes = "application/json", produces = "application/json")
-        public ResponseEntity<ProxyResponse> saveCardParams(@RequestBody ProductRequest productRequest)
-                        throws URISyntaxException {
+        public ResponseEntity<ProxyResponse> capture(@RequestBody ProductRequest productRequest) {
 
                 String method = Methods.CAPTURE;
 
                 ProviderPayload newProviderPayload = providerPayloadService
                         .createNewProviderPayload(productRequest, method);
 
-                ResponseEntity<ProxyResponse> responseEntity = captureService.sendProviderPayload(
-                                newProviderPayload,
-                                productRequest,
-                                method);
-
-                return responseEntity;
+                return captureService.sendProviderPayload(
+                        newProviderPayload,
+                        productRequest,
+                        method);
 
         }
 

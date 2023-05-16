@@ -6,7 +6,7 @@ import com.flw.moka.entity.request.PaymentDealerRequest;
 
 @Repository
 public class PaymentDealerRequestUtil {
-    private PaymentDealerRequest paymentDealerRequest = new PaymentDealerRequest();
+    private final PaymentDealerRequest paymentDealerRequest = new PaymentDealerRequest();
 
     public PaymentDealerRequest setAuthorizePayload(Long amount, String cardNumber, String currency,
             String cvcNumber, String expiryMonth, String expiryYear, String transactionReference) {

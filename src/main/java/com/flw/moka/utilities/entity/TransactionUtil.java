@@ -18,6 +18,8 @@ public class TransactionUtil {
     public void setAuthorizeTransactionFields(Transaction transaction, ProductRequest productRequest,
         ProxyResponse proxyResponse, TimeUtil timeUtility) {
         transaction.setAmount(productRequest.getAmount());
+        transaction.setBalance(productRequest.getAmount());
+        transaction.setAmountRefunded(0L);
         transaction.setCountry("TR");
         transaction.setCurrency(productRequest.getCurrency());
         transaction.setMask(productRequest.getCardNumber());
@@ -50,15 +52,8 @@ public class TransactionUtil {
             transaction.setExternalReference(externalReference);
             transaction.setTransactionStatus(Methods.VOID.toUpperCase());
             transaction.setTimeVoided(timeUtility.getDateTime());
-        }
-    }
-
-    public void setRefundTransactionFields(Transaction transaction, ProxyResponse proxyResponse,
-            TimeUtil timeUtility) {
-        String externalReference = proxyResponse.getMeta().getExternalReference();
-        if (externalReference != null) {
-            transaction.setExternalReference(externalReference);
-            transaction.setTimeVoided(timeUtility.getDateTime());
+            transaction.setAmountRefunded(transaction.getAmount());
+            transaction.setBalance(0L);
         }
     }
 

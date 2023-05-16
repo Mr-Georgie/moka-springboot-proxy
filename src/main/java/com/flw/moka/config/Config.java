@@ -1,4 +1,4 @@
-package com.flw.moka.security;
+package com.flw.moka.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;

@@ -1,5 +1,6 @@
 package com.flw.moka.validation;
 
+import com.flw.moka.service.entity_service.LogsService;
 import org.springframework.stereotype.Component;
 
 import com.flw.moka.entity.constants.Methods;
@@ -12,7 +13,6 @@ import com.flw.moka.exception.TransactionNotCapturedException;
 import com.flw.moka.exception.TransactionNotFoundException;
 import com.flw.moka.service.entity_service.TransactionService;
 import com.flw.moka.service.helper_service.ProxyResponseService;
-import com.flw.moka.utilities.entity.LogsUtil;
 
 import lombok.AllArgsConstructor;
 
@@ -31,7 +31,7 @@ public class MethodValidator {
     }
 
     public void preventDuplicateMethodCall(Transaction transaction, String method, ProductRequest productRequest,
-            LogsUtil logsUtil, TransactionService transactionService) {
+                                           LogsService logsService, TransactionService transactionService) {
 
         if (!method.equalsIgnoreCase(Methods.AUTHORIZE)) {
 
@@ -43,29 +43,34 @@ public class MethodValidator {
 
             boolean transactionAlreadyVoided = transaction.getTimeVoided() != null;
             boolean transactionAlreadyCaptured = transaction.getTimeCaptured() != null;
+            boolean transactionAlreadyRefunded = transaction.getBalance() == 0L;
 
             boolean isCapturingTransaction = method.equalsIgnoreCase(Methods.CAPTURE);
             boolean isVoidingTransaction = method.equalsIgnoreCase(Methods.VOID);
             boolean isRefundingTransaction = method.equalsIgnoreCase(Methods.REFUND);
-            boolean methodHasBeenDoneBefore = currentStatus.equalsIgnoreCase(method);
+            boolean methodHasBeenDoneBefore = !currentStatus.equalsIgnoreCase(Methods.REFUND) && currentStatus.equalsIgnoreCase(method);
 
             if (transactionAlreadyVoided && (isVoidingTransaction || isRefundingTransaction)) {
-                handleResponse(method, transaction, currentStatus, productRequest, logsUtil, transactionService);
+                handleResponse(method, transaction, currentStatus, productRequest, logsService, transactionService);
             }
 
             if (transactionAlreadyCaptured && isCapturingTransaction) {
-                handleResponse(method, transaction, currentStatus, productRequest, logsUtil, transactionService);
+                handleResponse(method, transaction, currentStatus, productRequest, logsService, transactionService);
+            }
+
+            if (transactionAlreadyRefunded && isRefundingTransaction) {
+                handleResponse(method, transaction, currentStatus, productRequest, logsService, transactionService);
             }
 
             if (methodHasBeenDoneBefore) {
-                handleResponse(method, transaction, currentStatus, productRequest, logsUtil, transactionService);
+                handleResponse(method, transaction, currentStatus, productRequest, logsService, transactionService);
             }
         }
         return;
     }
 
     private void handleResponse(String method, Transaction transaction, String currentStatus,
-            ProductRequest productRequest, LogsUtil logsUtil, TransactionService transactionService) {
+            ProductRequest productRequest, LogsService logsService, TransactionService transactionService) {
         ProxyResponse proxyResponse = new ProxyResponse();
         Meta meta = new Meta();
 
@@ -73,12 +78,10 @@ public class MethodValidator {
         proxyResponse.setResponseMessage(method.toUpperCase() + " has already been done on this transaction");
         proxyResponse.setMeta(meta);
 
-        logsUtil.setLogs(proxyResponse, productRequest, method);
+        logsService.saveLogs(proxyResponse, productRequest, method);
 
-        if (transactionService != null) {
-            proxyResponse.setResponseCode(transaction.getResponseCode());
-            transactionService.saveTransaction(productRequest, proxyResponse, transaction, method);
-        }
+        proxyResponse.setResponseCode(transaction.getResponseCode());
+        transactionService.saveTransaction(productRequest, proxyResponse, transaction, method);
 
         throw new TransactionMethodAlreadyDoneException(proxyResponse.getResponseMessage());
     }

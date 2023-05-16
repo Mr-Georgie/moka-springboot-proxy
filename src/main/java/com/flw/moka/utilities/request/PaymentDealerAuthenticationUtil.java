@@ -11,7 +11,7 @@ public class PaymentDealerAuthenticationUtil {
 
     @Autowired
     private Environment environment;
-    private PaymentDealerAuthentication paymentDealerAuthentication = new PaymentDealerAuthentication();
+    private final PaymentDealerAuthentication paymentDealerAuthentication = new PaymentDealerAuthentication();
 
     public PaymentDealerAuthentication setPaymentDealerDetails() {
         paymentDealerAuthentication.setDealerCode(environment.getProperty("payment.dealer.authentication.dealercode"));

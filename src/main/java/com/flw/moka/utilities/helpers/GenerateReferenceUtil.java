@@ -9,7 +9,6 @@ public class GenerateReferenceUtil {
 
     public String generateRandom(String prefix) {
         Random randomDigits = new Random();
-        String reference = prefix + (randomDigits.nextInt(100000000)) + (randomDigits.nextInt(100000000));
-        return reference;
+        return prefix + (randomDigits.nextInt(100000000)) + (randomDigits.nextInt(100000000));
     }
 }

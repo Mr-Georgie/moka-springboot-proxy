@@ -30,8 +30,8 @@ public class RefundController {
     MethodValidator methodValidator;
 
     @PostMapping(path = "/refund", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<ProxyResponse> saveCardParams(@RequestBody ProductRequest productRequest)
-        throws URISyntaxException, ParseException {
+    public ResponseEntity<ProxyResponse> refund(@RequestBody ProductRequest productRequest)
+        throws ParseException {
 
         Transaction transaction = transactionService.getTransaction(productRequest, Methods.REFUND);
 

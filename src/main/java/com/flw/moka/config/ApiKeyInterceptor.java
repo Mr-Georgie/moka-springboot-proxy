@@ -1,4 +1,4 @@
-package com.flw.moka.security;
+package com.flw.moka.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -9,6 +9,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+@SuppressWarnings("ALL")
 @Component
 public class ApiKeyInterceptor implements HandlerInterceptor {
 

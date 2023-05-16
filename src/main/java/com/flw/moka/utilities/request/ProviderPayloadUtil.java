@@ -8,7 +8,7 @@ import com.flw.moka.entity.request.ProviderPayload;
 
 @Repository
 public class ProviderPayloadUtil {
-    private ProviderPayload request = new ProviderPayload();
+    private final ProviderPayload request = new ProviderPayload();
 
     public ProviderPayload savePayload(PaymentDealerAuthentication paymentDealerAuthentication,
             PaymentDealerRequest paymentDealerRequest) {

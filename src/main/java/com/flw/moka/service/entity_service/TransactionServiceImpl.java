@@ -1,11 +1,6 @@
 package com.flw.moka.service.entity_service;
 
-import java.util.Optional;
-
-import org.springframework.stereotype.Service;
-
 import com.flw.moka.entity.constants.Methods;
-import com.flw.moka.entity.models.Refunds;
 import com.flw.moka.entity.models.Transaction;
 import com.flw.moka.entity.request.ProductRequest;
 import com.flw.moka.entity.response.ProxyResponse;
@@ -13,13 +8,16 @@ import com.flw.moka.exception.InvalidMethodNamePassedException;
 import com.flw.moka.exception.TransactionNotFoundException;
 import com.flw.moka.repository.TransactionRepository;
 import com.flw.moka.service.helper_service.ProxyResponseService;
-import com.flw.moka.utilities.entity.LogsUtil;
+import com.flw.moka.utilities.entity.RefundsUtil;
 import com.flw.moka.utilities.entity.TransactionUtil;
 import com.flw.moka.utilities.helpers.TimeUtil;
 import com.flw.moka.validation.MethodValidator;
-
 import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
+@SuppressWarnings("unused")
 @AllArgsConstructor
 @Service
 public class TransactionServiceImpl implements TransactionService {
@@ -27,14 +25,14 @@ public class TransactionServiceImpl implements TransactionService {
     TransactionRepository transactionsRepository;
     ProxyResponseService proxyResponseService;
     MethodValidator methodValidator;
-    LogsUtil logsUtil;
-    RefundsEntityService refundsEntityService;
     TransactionUtil transactionUtill;
+    RefundsUtil refundsUtil;
+    LogsService logsService;
 
     @Override
     public void saveTransaction(ProductRequest productRequest, ProxyResponse proxyResponse,
-            Transaction transaction, String method) {
-
+                                Transaction transaction, String method) {
+        Transaction refund = null;
         TimeUtil timeUtility = new TimeUtil();
 
         transaction.setResponseCode(proxyResponse.getResponseCode());
@@ -52,7 +50,7 @@ public class TransactionServiceImpl implements TransactionService {
                 transactionUtill.setVoidTransactionFields(transaction, proxyResponse, timeUtility);
                 break;
             case Methods.REFUND:
-                transactionUtill.setRefundTransactionFields(transaction, proxyResponse, timeUtility);
+                refund = refundsUtil.createRefundRecord(transaction, proxyResponse, productRequest, timeUtility);
                 break;
             case Methods.STATUS:
                 break;
@@ -60,51 +58,44 @@ public class TransactionServiceImpl implements TransactionService {
                 throw new InvalidMethodNamePassedException("method not recognized.");
         }
 
-        saveTransactionToDatabase(transaction);
+        if (method.equalsIgnoreCase(Methods.REFUND)) {
+            transactionsRepository.save(refund);
+        } else {
+            transactionsRepository.save(transaction);
+        }
     }
 
     @Override
     public Transaction getTransaction(ProductRequest productRequest, String method) {
+        Transaction existingTransaction;
+        TimeUtil timeUtil = new TimeUtil();
         String reference = productRequest.getTransactionReference();
-        TimeUtil timeUtility = new TimeUtil();
-        Optional<Transaction> transaction = getTransactionIfExistInDB(reference);
+//        Optional<Transaction> transaction = transactionsRepository.findByTransactionReference(reference);
+        Optional<Transaction> transaction = transactionsRepository.findFirstByTransactionReferenceOrderByIdDesc(reference);
 
         if (transaction.isEmpty()) {
-
-            ProxyResponse proxyResponse = transactionUtill.prepareResponseIfTransactionDoesNotExist(reference, method);
-            logsUtil.setLogs(proxyResponse, productRequest, method);
-
-            Transaction nonExistingTransaction = transactionUtill.prepareNonExistingTransaction(productRequest, timeUtility);
-            if (method.equalsIgnoreCase(Methods.REFUND)) {
-                Refunds newRefund = new Refunds();
-                refundsEntityService.saveRefund(proxyResponse, newRefund, nonExistingTransaction);
-            } else {
-                saveTransaction(productRequest, proxyResponse, nonExistingTransaction, method);
+            ProxyResponse proxyResponse = handleNonExistingTransaction(productRequest, timeUtil, reference, method);
+            throw new TransactionNotFoundException(proxyResponse.getResponseMessage());
+        } else {
+            existingTransaction = transaction.get();
+            if (existingTransaction.getTransactionStatus() == null) {
+                ProxyResponse proxyResponse = handleNonExistingTransaction(productRequest, timeUtil, reference, method);
+                throw new TransactionNotFoundException(proxyResponse.getResponseMessage());
             }
-            throw new TransactionNotFoundException(proxyResponse.getResponseMessage());
-        }
-
-        Transaction existingTransaction = transaction.get();
-        if (existingTransaction.getTransactionStatus() == null) {
-            ProxyResponse proxyResponse = transactionUtill.prepareResponseIfTransactionDoesNotExist(reference, method);
-            logsUtil.setLogs(proxyResponse, productRequest, method);
-
-            saveTransaction(productRequest, proxyResponse, existingTransaction, method);
-            throw new TransactionNotFoundException(proxyResponse.getResponseMessage());
         }
 
         return existingTransaction;
     }
 
-    @Override
-    public Optional<Transaction> getTransactionIfExistInDB(String ref) {
+    private ProxyResponse handleNonExistingTransaction(ProductRequest productRequest, TimeUtil timeUtil, String reference, String method) {
+        ProxyResponse proxyResponse = transactionUtill.prepareResponseIfTransactionDoesNotExist(reference, method);
+        logsService.saveLogs(proxyResponse, productRequest, method);
 
-        Optional<Transaction> transactions = transactionsRepository.findByTransactionReference(ref);
-        return transactions;
+        Transaction nonExistingTransaction = transactionUtill.prepareNonExistingTransaction(productRequest, timeUtil);
+        saveTransaction(productRequest, proxyResponse, nonExistingTransaction, method);
+
+        return proxyResponse;
     }
 
-    private Transaction saveTransactionToDatabase(Transaction transactions) {
-        return transactionsRepository.save(transactions);
-    }
+
 }
-
