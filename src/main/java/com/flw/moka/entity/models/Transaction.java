@@ -18,10 +18,12 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 @Table(name = "transactions", indexes = {
-        @Index(name = "transactionref_index", columnList = "transaction_reference"),
-        @Index(name = "timecaptured_index", columnList = "time_captured"),
-        @Index(name = "timevoided_index", columnList = "time_voided"),
-        @Index(name = "timein_index", columnList = "time_in"),
+        @Index(name = "transaction_ref_index", columnList = "transaction_reference"),
+        @Index(name = "refund_id_index", columnList = "refund_id"),
+        @Index(name = "time_captured_index", columnList = "time_captured"),
+        @Index(name = "time_voided_index", columnList = "time_voided"),
+        @Index(name = "time_refunded_index", columnList = "time_refunded"),
+        @Index(name = "time_in_index", columnList = "time_in"),
         @Index(name = "mask_index", columnList = "mask")
 })
 public class Transaction {
@@ -31,43 +33,55 @@ public class Transaction {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "transaction_reference", nullable = false, unique = true)
+    @Column(name = "transaction_reference", nullable = false)
     private String transactionReference;
 
-    @Column(name = "payload_reference", nullable = true)
+    @Column(name = "payload_reference")
     private String payloadReference;
 
-    @Column(name = "external_reference", nullable = true)
+    @Column(name = "external_reference")
     private String externalReference;
 
-    @Column(name = "mask", nullable = true)
+    @Column(name = "mask")
     private String mask;
 
-    @Column(name = "time_in", nullable = true)
+    @Column(name = "time_in")
     private String timeIn;
 
-    @Column(name = "time_captured", nullable = true)
+    @Column(name = "time_captured")
     private String timeCaptured;
 
-    @Column(name = "time_voided", nullable = true)
+    @Column(name = "time_voided")
     private String timeVoided;
 
-    @Column(name = "transaction_status", nullable = true)
+    @Column(name = "time_refunded")
+    private String timeRefunded;
+
+    @Column(name = "refund_id")
+    private String refundId;
+
+    @Column(name = "transaction_status")
     private String transactionStatus;
 
-    @Column(name = "provider", nullable = true)
+    @Column(name = "provider")
     private String provider;
 
-    @Column(name = "amount", nullable = true)
+    @Column(name = "amount")
     private Long amount;
 
-    @Column(name = "currency", nullable = true)
+    @Column(name = "balance")
+    private Long balance;
+
+    @Column(name = "amount_refunded")
+    private Long amountRefunded;
+
+    @Column(name = "currency")
     private String currency;
 
-    @Column(name = "country", nullable = true)
+    @Column(name = "country")
     private String country;
 
-    @Column(name = "narration", nullable = true)
+    @Column(name = "narration")
     private String narration;
 
     @Column(name = "response_message", nullable = false)

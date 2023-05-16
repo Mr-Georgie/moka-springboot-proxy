@@ -8,4 +8,6 @@ import com.flw.moka.entity.models.Transaction;
 
 public interface TransactionRepository extends CrudRepository<Transaction, Long> {
     Optional<Transaction> findByTransactionReference(String transactionReference);
+
+    Optional<Transaction> findFirstByTransactionReferenceOrderByIdDesc(String transactionReference);
 }

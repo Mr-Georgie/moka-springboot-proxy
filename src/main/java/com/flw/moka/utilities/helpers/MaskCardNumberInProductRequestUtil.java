@@ -18,9 +18,8 @@ public class MaskCardNumberInProductRequestUtil {
     private static String maskHandler(String cardNumber) {
         String firstSixChars = cardNumber.substring(0, 6);
         String lastFourChars = cardNumber.substring(cardNumber.length() - 4);
-        String maskedCardNumber = firstSixChars + "******" + lastFourChars;
 
-        return maskedCardNumber;
+        return firstSixChars + "******" + lastFourChars;
     }
 
 }

@@ -6,6 +6,7 @@ import org.springframework.data.repository.CrudRepository;
 
 import com.flw.moka.entity.models.Logs;
 
+@SuppressWarnings("ALL")
 public interface LogsRepository extends CrudRepository<Logs, Long> {
     List<Logs> findAll();
 }

@@ -1,5 +1,6 @@
 package com.flw.moka.service.controller_service;
 
+import com.flw.moka.service.entity_service.LogsService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -10,7 +11,6 @@ import com.flw.moka.entity.request.ProductRequest;
 import com.flw.moka.entity.request.ProviderPayload;
 import com.flw.moka.entity.response.ProxyResponse;
 import com.flw.moka.service.entity_service.TransactionService;
-import com.flw.moka.utilities.entity.LogsUtil;
 import com.flw.moka.utilities.helpers.MaskCardNumberInProductRequestUtil;
 import com.flw.moka.utilities.helpers.ProviderApiUtil;
 
@@ -23,7 +23,7 @@ public class AuthorizeService {
         TransactionService transactionService;
         ProviderApiUtil providerApiUtil;
         MaskCardNumberInProductRequestUtil maskCardNumberInProductRequestUtility;
-        LogsUtil logsUtil;
+        LogsService logsService;
 
         public ResponseEntity<ProxyResponse> sendProviderPayload(ProviderPayload providerPayload,
                         ProductRequest productRequest, String method) {
@@ -43,12 +43,11 @@ public class AuthorizeService {
         }
 
         private void addEntitiesToDatabase(ProxyResponse proxyResponse, ProductRequest productRequest) {
-                logsUtil.setLogs(proxyResponse, productRequest, Methods.AUTHORIZE);
+                logsService.saveLogs(proxyResponse, productRequest, Methods.AUTHORIZE);
 
                 Transaction transaction = new Transaction();
                 transactionService.saveTransaction(productRequest, proxyResponse, transaction,
                                 Methods.AUTHORIZE);
-                return;
         }
 
 }

@@ -18,10 +18,10 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 @Table(name = "refunds", indexes = {
-        @Index(name = "refundref_index", columnList = "refund_reference"),
-        @Index(name = "transactionref_index", columnList = "transaction_reference"),
-        @Index(name = "payloadref_index", columnList = "payload_reference"),
-        @Index(name = "timerefunded_index", columnList = "time_refunded"),
+        @Index(name = "refund_ref_index", columnList = "refund_reference"),
+        @Index(name = "transaction_ref_index", columnList = "transaction_reference"),
+        @Index(name = "payload_ref_index", columnList = "payload_reference"),
+        @Index(name = "time_refunded_index", columnList = "time_refunded"),
         @Index(name = "mask_index", columnList = "mask")
 })
 public class Refunds {
@@ -34,40 +34,40 @@ public class Refunds {
     @Column(name = "transaction_reference", nullable = false)
     private String transactionReference;
 
-    @Column(name = "payload_reference", nullable = true)
+    @Column(name = "payload_reference")
     private String payloadReference;
 
-    @Column(name = "refund_reference", nullable = true)
+    @Column(name = "refund_reference")
     private String refundReference;
 
-    @Column(name = "refund_id", nullable = true)
+    @Column(name = "refund_id")
     private String refundId;
 
-    @Column(name = "external_reference", nullable = true)
+    @Column(name = "external_reference")
     private String externalReference;
 
-    @Column(name = "mask", nullable = true)
+    @Column(name = "mask")
     private String mask;
 
-    @Column(name = "time_refunded", nullable = true)
+    @Column(name = "time_refunded")
     private String timeRefunded;
 
-    @Column(name = "provider", nullable = true)
+    @Column(name = "provider")
     private String provider;
 
-    @Column(name = "balance", nullable = true)
+    @Column(name = "balance")
     private Long balance;
 
-    @Column(name = "refunded_amount", nullable = true)
+    @Column(name = "refunded_amount")
     private Long refundedAmount;
 
-    @Column(name = "currency", nullable = true)
+    @Column(name = "currency")
     private String currency;
 
-    @Column(name = "country", nullable = true)
+    @Column(name = "country")
     private String country;
 
-    @Column(name = "narration", nullable = true)
+    @Column(name = "narration")
     private String narration;
 
     @Column(name = "response_message", nullable = false)

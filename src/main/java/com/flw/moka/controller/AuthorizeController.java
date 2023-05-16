@@ -24,30 +24,28 @@ import lombok.AllArgsConstructor;
 @RequestMapping("/moka")
 public class AuthorizeController {
 
-        ProviderPayloadService providerPayloadService;
-        AuthorizeService authService;
-        GenerateReferenceUtil generateReferenceUtil;
+    ProviderPayloadService providerPayloadService;
+    AuthorizeService authService;
+    GenerateReferenceUtil generateReferenceUtil;
 
-        @PostMapping(path = "/authorize", consumes = "application/json", produces = "application/json")
-        public ResponseEntity<ProxyResponse> saveCardParams(@Valid @RequestBody ProductRequest productRequest,
-                        BindingResult bindingResult) throws Exception {
+    @PostMapping(path = "/authorize", consumes = "application/json", produces = "application/json")
+    public ResponseEntity<ProxyResponse> authorize(@Valid @RequestBody ProductRequest productRequest,
+                                                        BindingResult bindingResult) {
 
-                String method = Methods.AUTHORIZE;
+        String method = Methods.AUTHORIZE;
 
-                if (bindingResult.hasErrors()) {
-                        throw new InvalidProductRequestException(bindingResult);
-                }
-
-                productRequest.setTransactionReference(generateReferenceUtil.generateRandom("MRN"));
-
-                ProviderPayload newProviderPayload = providerPayloadService
-                        .createNewProviderPayload(productRequest, method);
-
-                ResponseEntity<ProxyResponse> responseEntity = authService.sendProviderPayload(
-                                newProviderPayload, productRequest, method);
-
-                return responseEntity;
-
+        if (bindingResult.hasErrors()) {
+            throw new InvalidProductRequestException(bindingResult);
         }
+
+        productRequest.setTransactionReference(generateReferenceUtil.generateRandom("MRN"));
+
+        ProviderPayload newProviderPayload = providerPayloadService
+                .createNewProviderPayload(productRequest, method);
+
+        return authService.sendProviderPayload(
+                newProviderPayload, productRequest, method);
+
+    }
 
 }

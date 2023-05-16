@@ -13,6 +13,7 @@ import com.flw.moka.service.entity_service.LogsService;
 
 import lombok.AllArgsConstructor;
 
+@SuppressWarnings("unused")
 @AllArgsConstructor
 @Service
 public class ArchiveRecordsService {
@@ -20,6 +21,7 @@ public class ArchiveRecordsService {
     private LogsService logsService;
     private LogsArchiveService logsArchiveService;
 
+    @SuppressWarnings("unused")
     @Scheduled(cron = "0 0 0 31 12 ?") // runs every 31st December at midnight (00:00:00)
     public void init() {
         archiveLogs();
@@ -48,6 +50,7 @@ public class ArchiveRecordsService {
         System.out.println("==================================");
     }
 
+    @SuppressWarnings("unused")
     public void unArchiveLogs() {
         List<Logs> logsList = new ArrayList<>();
         List<LogsArchive> logsArchives = logsArchiveService.findAll();

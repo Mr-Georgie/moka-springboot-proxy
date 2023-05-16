@@ -11,6 +11,7 @@ import com.flw.moka.entity.response.ProviderResponse;
 import com.flw.moka.entity.response.ProviderResponseData;
 import com.flw.moka.entity.response.ProxyResponse;
 
+@SuppressWarnings("ALL")
 @Component
 public class ProxyResponseUtil {
     ProxyResponse proxyResponse = new ProxyResponse();
@@ -47,16 +48,16 @@ public class ProxyResponseUtil {
             ProviderResponseData dataEntity) {
         if (method.equalsIgnoreCase(Methods.AUTHORIZE)) {
             proxyResponse.setResponseMessage("Pending Capture");
-            proxyResponse.setResponseCode("02");
+            proxyResponse.setResponseCode("00");
         } else if (method.equalsIgnoreCase(Methods.CAPTURE)) {
             proxyResponse.setResponseMessage("Capture Successful");
             proxyResponse.setResponseCode("00");
         } else if (method.equalsIgnoreCase(Methods.VOID)) {
             proxyResponse.setResponseMessage("Void Successful");
-            proxyResponse.setResponseCode("01");
+            proxyResponse.setResponseCode("00");
         } else if (method.equalsIgnoreCase(Methods.REFUND)) {
             proxyResponse.setResponseMessage("Refund Successful");
-            proxyResponse.setResponseCode("03");
+            proxyResponse.setResponseCode("00");
             meta.setRefundId(dataEntity.getRefundRequestId());
         }
 

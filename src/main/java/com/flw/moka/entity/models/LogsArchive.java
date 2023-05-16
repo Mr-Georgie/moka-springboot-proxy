@@ -31,7 +31,7 @@ public class LogsArchive {
     @Column(name = "transaction_reference", nullable = false)
     private String transactionReference;
 
-    @Column(name = "external_reference", nullable = true)
+    @Column(name = "external_reference")
     private String externalReference;
 
     @Column(name = "method", nullable = false)

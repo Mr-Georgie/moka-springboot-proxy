@@ -18,11 +18,11 @@ public class TimeUtil {
         
         Long transactionTimeMillis = timeInMilliSec(dateString);
 
-        Long currentTimeMillis = System.currentTimeMillis();
+        long currentTimeMillis = System.currentTimeMillis();
 
         int oneDayInMilliseconds = 24 * 60 * 60 * 1000;
 
-        Long timeOneDayAgoMillis = currentTimeMillis - oneDayInMilliseconds;
+        long timeOneDayAgoMillis = currentTimeMillis - oneDayInMilliseconds;
 
         return timeOneDayAgoMillis >= transactionTimeMillis;
     }
@@ -32,9 +32,7 @@ public class TimeUtil {
 
         Date date = dateFormat.parse(dateString);
 
-        Long millis = date.getTime();
-
-        return millis;
+        return date.getTime();
     }
 
 }

@@ -1,5 +1,6 @@
 package com.flw.moka.service.controller_service;
 
+import com.flw.moka.service.entity_service.LogsService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -10,7 +11,6 @@ import com.flw.moka.entity.request.ProductRequest;
 import com.flw.moka.entity.request.ProviderPayload;
 import com.flw.moka.entity.response.ProxyResponse;
 import com.flw.moka.service.entity_service.TransactionService;
-import com.flw.moka.utilities.entity.LogsUtil;
 import com.flw.moka.utilities.helpers.ProviderApiUtil;
 import com.flw.moka.validation.MethodValidator;
 
@@ -22,7 +22,7 @@ public class CaptureService {
 
 	TransactionService transactionService;
 	ProviderApiUtil providerApiUtil;
-	LogsUtil logsUtil;
+	LogsService logsService;
 	MethodValidator methodValidator;
 
 	public ResponseEntity<ProxyResponse> sendProviderPayload(ProviderPayload providerPayload,
@@ -30,7 +30,7 @@ public class CaptureService {
 
 		Transaction transaction = transactionService.getTransaction(productRequest, method);
 
-		methodValidator.preventDuplicateMethodCall(transaction, method, productRequest, logsUtil, transactionService);
+		methodValidator.preventDuplicateMethodCall(transaction, method, productRequest, logsService, transactionService);
 
 		ProxyResponse proxyResponse = providerApiUtil
                                 .apiCallHandler(method, providerPayload, productRequest);
@@ -42,10 +42,10 @@ public class CaptureService {
 
 	private void addEntitiesToDatabase(ProxyResponse proxyResponse, ProductRequest productRequest,
 			Transaction transaction) {
-		logsUtil.setLogs(proxyResponse, productRequest, Methods.CAPTURE);
+		logsService.saveLogs(proxyResponse, productRequest, Methods.CAPTURE);
 
 		transactionService.saveTransaction(productRequest, proxyResponse, transaction, Methods.CAPTURE);
-		return;
+
 	}
 
 	

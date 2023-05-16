@@ -11,7 +11,6 @@ import com.flw.moka.entity.constants.Methods;
 import com.flw.moka.entity.request.ProductRequest;
 import com.flw.moka.entity.request.ProviderPayload;
 import com.flw.moka.entity.response.StatusCheckResponse;
-import com.flw.moka.service.controller_service.StatusCheckService;
 import com.flw.moka.service.helper_service.ProviderPayloadService;
 
 import lombok.AllArgsConstructor;
@@ -22,10 +21,9 @@ import lombok.AllArgsConstructor;
 public class StatusCheckController {
 
     ProviderPayloadService providerPayloadService;
-    StatusCheckService statusCheckService;
 
     @GetMapping("/status-check/{reference}")
-    public ResponseEntity<StatusCheckResponse> getContact(@PathVariable String reference) {
+    public ResponseEntity<StatusCheckResponse> statusCheck(@PathVariable String reference) {
 
         ProductRequest productRequest = new ProductRequest();
 
@@ -34,10 +32,7 @@ public class StatusCheckController {
         ProviderPayload newProviderPayload = providerPayloadService
                         .createNewProviderPayload(productRequest, Methods.STATUS);
 
-        StatusCheckResponse status = statusCheckService.check(reference,
-                                newProviderPayload, productRequest);
-
-        return ResponseEntity.status(HttpStatus.OK).body(status);
+        return ResponseEntity.status(HttpStatus.OK).body(new StatusCheckResponse());
         
     }
 }

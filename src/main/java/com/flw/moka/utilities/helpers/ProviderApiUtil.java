@@ -22,6 +22,7 @@ import com.flw.moka.service.helper_service.ProxyResponseService;
 
 import lombok.AllArgsConstructor;
 
+@SuppressWarnings("ALL")
 @AllArgsConstructor
 @Component
 public class ProviderApiUtil {

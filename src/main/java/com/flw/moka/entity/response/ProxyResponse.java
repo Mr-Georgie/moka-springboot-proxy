@@ -20,11 +20,3 @@ public class ProxyResponse {
     private ProviderResponse providerResponse;
 
 }
-
-// private String message;
-// private String code;
-// private String transactionReference;
-// private String payloadReference;
-// private String externalReference;
-// private String provider;
-// private ProviderResponse providerResponse;
